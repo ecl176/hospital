@@ -10,6 +10,7 @@
             directory
             :beforeUpload="beforeUpload"
             :customRequest = 'customRequest'
+            @change="handleUploadChange"
         >
             <p class="ant-upload-drag-icon">
             <a-icon type="inbox" />
@@ -22,13 +23,13 @@
           <a-col class="gutter-row" :span="8">
             <div class="gutter-box">
               <label class="label">住院号</label>
-              <a-input placeholder="请输入住院号" v-model='hospitalNum'/>
+              <a-input placeholder="请输入住院号" v-model='hospitalNum' disabled style="color:'#333'"/>
             </div>
           </a-col>
           <a-col class="gutter-row" :span="8">
             <div class="gutter-box">
               <label class="label">主治医师</label>
-              <a-select style="width:100%;" @change="handleCaseChange" placeholder="请选择主治医生">
+              <a-select style="width:100%;" @change="handleCaseChange" :value="currentCaseName" placeholder="请选择主治医生">
                 <a-select-option v-for="(item, index) in caseData" :key="index"
                   >{{item}}</a-select-option
                 >
@@ -41,6 +42,8 @@
               <a-input placeholder="请输入病人姓名" v-model='patientName' />
             </div>
           </a-col>
+        </a-row>
+        <a-row :gutter="16">
           <a-col class="gutter-row" :span="8">
             <div class="gutter-box sex">
               <label class="label">性别</label>
@@ -53,7 +56,7 @@
           <a-col class="gutter-row" :span="8">
             <div class="gutter-box">
               <label class="label">病人年龄</label>
-              <a-input placeholder="请输入病人年龄" v-model='age' style="height:30px"/>
+              <a-input placeholder="请输入病人年龄" v-model='age'/>
             </div>
           </a-col>
           <a-col class="gutter-row" :span="8">
@@ -65,6 +68,7 @@
                 @change="handleZdbwChange"
                 placeholder="请选择诊断部位"
                 :defaultValue="zdData"
+                :value="zdData"
                 >
                 <a-select-option v-for="(item, index) in allZdData" :key="index" :value="item">
                   {{item}}
@@ -72,6 +76,8 @@
               </a-select>
             </div>
           </a-col>
+        </a-row>
+        <a-row :gutter="16">
           <a-col class="gutter-row" :span="8">
             <div class="gutter-box">
               <label class="label">手术方式</label>
@@ -80,7 +86,7 @@
                 style="width: 100%"
                 @change="handleSsfsChange"
                 placeholder="请选择手术方式"
-                :defaultValue="ssfsData"
+                :value="ssfsData"
                 >
                 <a-select-option v-for="(item, index) in allSsfsData" :key="index" :value="item">
                   {{item}}
@@ -97,6 +103,7 @@
                 @change="handleZlfsChange"
                 placeholder="请选择治疗方式"
                 :defaultValue="zlfsData"
+                :value="zlfsData"
                 >
                 <a-select-option v-for="(item, index) in allZlfsData" :key="index" :value="item">
                   {{item}}
@@ -113,6 +120,7 @@
                 @change="handleZljgChange"
                 placeholder="请选择治疗结果"
                 :defaultValue="zljgData"
+                :value="zljgData"
                 >
                 <a-select-option v-for="(item, index) in allZljgData" :key="index" :value="item">
                   {{item}}
@@ -120,6 +128,8 @@
               </a-select>
             </div>
           </a-col>
+        </a-row>
+        <a-row :gutter="16">
           <a-col class="gutter-row" :span="8">
             <div class="gutter-box">
               <label class="label">联系电话</label>
@@ -129,10 +139,12 @@
           <a-col class="gutter-row" :span="8">
             <div class="gutter-box">
               <label class="label">入院日期</label>
-              <a-date-picker @change="onDateChange" style="width:100%;" placeholder="请选择入院日期">
+              <a-date-picker @change="onDateChange" v-model="ryDate" style="width:100%;" placeholder="请选择入院日期">
               </a-date-picker>
             </div>
           </a-col>
+        </a-row>
+        <a-row :gutter="16">
           <a-col class="gutter-row" :span="24">
             <div class="gutter-box">
               <label class="label remarks">备注</label>
@@ -147,6 +159,10 @@
         </a-row>
       </div>
       <div class="photo-box">
+        <div class="mask" v-show="isLoadingImg">
+          <a-spin tip="图片上传中请稍等..." size="large" class="spin-icon">
+          </a-spin>
+        </div>
         <div class="photo-item">
           <label>术前</label>
           <div class="upload-img-btn">
@@ -219,11 +235,12 @@
       </div>
       <div class="btn-list">
         <a-button type="primary" @click="handleUpload">确定</a-button>
+        <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
+        
       </div>
     </div>
 </template>
 <script>
-  const caseData = ['张医生','王医生','李医生'];//医生信息
   // const allZdData = ['头部','脸部','腿部','胳膊'];//所有诊断数据
   // const allSsfsData = ['开刀','切割'];//所有手术方式数据
   // const allZlfsData = ['药物治疗','手术'];//所有治疗方式数据
@@ -232,8 +249,10 @@
     data() {
       return {
         hospitalNum: '', //住院号
-        caseData: caseData,//所有医生信息
-        currentCaseNames: "", // 默认医生信息
+        allCaseData: [],//医生信息
+        caseData: [],//所有医生信息
+        currentCaseName: [],
+        currentCaseId: "", // 默认医生信息
         allZdData: [],//诊断部位数据
         zdData: [],//当前选择诊断部位数据
         allSsfsData: [],//所有手术方式数据
@@ -256,7 +275,8 @@
         afterImageData: [],
         allImageData: [],
         src: '',
-        imgNumber: 0
+        imgNumber: 0,
+        isLoadingImg: false
       };
     },
     mounted() {
@@ -270,70 +290,71 @@
       // 获取所有医生信息
       getCaseData() {
         const self = this;
-        this.$http.get('/swing/dictionary/TITLE_TYPE').then((res) => {
+        this.$http.get('/doctor/all').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
-              self.caseData.push(item.value);
+              self.caseData.push(item.doctorName);
             });
+            self.allCaseData = data;
           }
-        }).catch((err) => {
+        }).catch(() => {
           self.$message.error('请求失败');
         });
       },
       // 获取所有诊断数据
       getDiagnosisData() {
         const self = this;
-        this.$http.get('/swing/dictionary/DIAGNOSIS_TYPE').then((res) => {
+        this.$http.get('/dictionary/DIAGNOSIS_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
               self.allZdData.push(item.value);
             });
           }
-        }).catch((err) => {
+        }).catch(() => {
           self.$message.error('请求失败');
         });
       },
       //获取所有手术方式数据
       getOperationData() {
         const self = this;
-        this.$http.get('/swing/dictionary/OPERATION_NAME_TYPE').then((res) => {
+        this.$http.get('/dictionary/OPERATION_NAME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
               self.allSsfsData.push(item.value);
             });
           }
-        }).catch((err) => {
+        }).catch(() => {
           self.$message.error('请求失败');
         });
       },
       // 获取所有治疗方式数据
       getTreatmentMethodData() {
         const self = this;
-        this.$http.get('/swing/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
+        this.$http.get('/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
               self.allZlfsData.push(item.value);
             });
           }
-        }).catch((err) => {
+        }).catch(() => {
           self.$message.error('请求失败');
         });
       },
       //获取所有治疗结果数据
       getTreatmentOutcomeData() {
         const self = this;
-        this.$http.get('/swing/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
+        this.$http.get('/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
               self.allZljgData.push(item.value);
             });
           }
-        }).catch((err) => {
+        }).catch(() => {
           self.$message.error('请求失败');
         });
       },
@@ -343,6 +364,10 @@
       beforeUpload (file) {
         const self = this;
         if(self.floderName === '') {
+          self.preImageData = [];
+          self.intraImageData = [];
+          self.afterImageData = [];
+          self.allImageData = [];
           self.floderName = file.webkitRelativePath.split('/')[0].split('，');
           self.floderName.forEach((item, index) => {
             self.floderName[index] = item.trim().replace('岁','');
@@ -359,6 +384,7 @@
       },
       uploadAllImage () {
         const self = this;
+        self.isLoadingImg = true;
         self.allImageData.forEach(async (file) => {
           const subName = file.file.webkitRelativePath.split('/')[1];
           let type = '';
@@ -372,13 +398,13 @@
             case '术后':
               type = 'POST_OPERATIVE_IMAGE_TYPE';
               break;
-          };
+          }
           const formData = new FormData();
           formData.append('image', file.file);
           formData.append('type', type);
           formData.append('caseNo', self.patientId);
        
-          self.$http.post('/swing/image', formData,)
+          self.$http.post('/image', formData,)
           .then((res) => {
             const data = res.data;
             self.src = 'data:image/png;base64,' + data.image;
@@ -405,7 +431,7 @@
       async uploadPatientName (floderName) {
         console.log(floderName);
         const self = this;
-        await self.$http.put('/swing/patientcase/' + floderName)
+        await self.$http.put('/patientcase/' + floderName)
         .then(function(res) {
           if(res.status == 200) {
             self.floderName = '';
@@ -415,7 +441,9 @@
             self.patientName = data.patientName; //姓名
             self.sex = data.patientGender === '男' ? 0 : 1;
             self.age = data.patientAge; // 年龄
+            self.zdData = [];
             self.zdData.push(data.diagnosis);// 诊断
+            self.ssfsData = [];
             self.ssfsData.push(data.operationName); // 手术方式
             self.uploadAllImage();
           }
@@ -429,8 +457,11 @@
         });
       },
       // 选择主治医师
-      handleCaseChange(items) {
-        this.currentCaseNames = items;
+      handleCaseChange(index) {
+        const self = this;
+        self.currentCaseId = self.allCaseData[index].doctorId;
+        self.currentCaseName = [];
+        self.currentCaseName.push(self.allCaseData[index].doctorName)
       },
       // 诊断部位选择
       handleZdbwChange(selectedItems) {
@@ -438,7 +469,8 @@
       },
       // 手术方式
       handleSsfsChange(item) {
-        this.ssfsData = item;
+        const self = this;
+        self.ssfsData = item;
       },
       // 治疗方式
       handleZlfsChange(item) {
@@ -456,9 +488,9 @@
       handleUpload() {
         const self = this;
         // 上传信息
-        const obj = {
+        const params = {
           "admissionDate": self.ryDate,
-          "attendingDoctorId": self.currentCaseNames,
+          "attendingDoctorId": self.currentCaseId,
           "caseNo": self.patientId,
           "diagnosis": self.zdData,
           "operationName": self.ssfsData,
@@ -469,6 +501,13 @@
           "treatmentMethod": self.zlfsData,
           "treatmentOutcome": self.zljgData
         };
+        self.$http.post('/image/multipleDelete', params)
+        .then((res) => {
+          console.log(res);
+          self.$message.success('上传成功');
+        }).catch((err) => {
+          console.log(err);
+        });
       },
       //清除上传文件夹上传图片数据
       clearImgData() {
@@ -477,104 +516,72 @@
         if(self.imgNumber === self.allImageData.length) {
           self.allImageData = [];
           self.imgNumber = 0;
+          self.isLoadingImg = false;
         }
       },
       //术前照片上传
       beforeImgUpload(file) {
-        const subName = file.file.webkitRelativePath.split('/')[1];
-        let type = '';
-        switch(subName) {
-          case '术前':
-            type = 'PRE_OPERATIVE_IMAGE_TYPE';
-            break;
-          case '术中':
-            type = 'INTRA_OPERATIVE_IMAGE_TYPE';
-            break;
-          case '术后':
-            type = 'POST_OPERATIVE_IMAGE_TYPE';
-            break;
-        };
+        const self = this;
+        self.isLoadingImg = true;
         const formData = new FormData();
         formData.append('image', file.file);
         formData.append('type', 'PRE_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.patientId);
-      
-        self.$http.post('/swing/image', formData, {
-          responseType: "arraybuffer"
-        }).then((res) => {
-          debugger;
-          return 'data:image/png;base64,' + btoa(
-              new Uint8Array(res.data)
-                .reduce((data, byte) => data + String.fromCharCode(byte), '')
-            );
-        }).then((data) => {
-          debugger;
-          self.src = data;
-
+        self.$http.post('/image', formData)
+        .then((res) => {
+          const data = res.data;
+          self.src = 'data:image/png;base64,' + data.image;
+          const obj = {
+            src: 'data:image/png;base64,' + data.image,
+            type: data.imageType,
+            id: data.imageUid
+          };
+          self.preImageData.push(obj);
+          self.isLoadingImg = false;
         }).catch((err) => {
           console.log(err);
         });
       },
       intraImgUpload(file) {
-        const subName = file.file.webkitRelativePath.split('/')[1];
-        let type = '';
-        switch(subName) {
-          case '术前':
-            type = 'PRE_OPERATIVE_IMAGE_TYPE';
-            break;
-          case '术中':
-            type = 'INTRA_OPERATIVE_IMAGE_TYPE';
-            break;
-          case '术后':
-            type = 'POST_OPERATIVE_IMAGE_TYPE';
-            break;
-        };
+        const self = this;
+        self.isLoadingImg = true;
         const formData = new FormData();
         formData.append('image', file.file);
-        formData.append('type', 'PRE_OPERATIVE_IMAGE_TYPE');
+        formData.append('type', 'INTRA_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.patientId);
-      
-        self.$http.post('/swing/image', formData, {
-          responseType: "arraybuffer"
-        }).then((res) => {
-          debugger;
-          return 'data:image/png;base64,' + btoa(
-              new Uint8Array(res.data)
-                .reduce((data, byte) => data + String.fromCharCode(byte), '')
-            );
-        }).then((data) => {
-          debugger;
-          self.src = data;
-
+        self.$http.post('/image', formData)
+        .then((res) => {
+          self.isLoadingImg = false;
+          const data = res.data;
+          self.src = 'data:image/png;base64,' + data.image;
+          const obj = {
+            src: 'data:image/png;base64,' + data.image,
+            type: data.imageType,
+            id: data.imageUid
+          };
+          self.intraImageData.push(obj);
         }).catch((err) => {
           console.log(err);
         });
       },
       afterImgUpload(file) {
-        const subName = file.file.webkitRelativePath.split('/')[1];
-        let type = '';
-        switch(subName) {
-          case '术前':
-            type = 'PRE_OPERATIVE_IMAGE_TYPE';
-            break;
-          case '术中':
-            type = 'INTRA_OPERATIVE_IMAGE_TYPE';
-            break;
-          case '术后':
-            type = 'POST_OPERATIVE_IMAGE_TYPE';
-            break;
-        };
+        const self = this;
+        self.isLoadingImg = true;
         const formData = new FormData();
         formData.append('image', file.file);
-        formData.append('type', 'PRE_OPERATIVE_IMAGE_TYPE');
+        formData.append('type', 'POST_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.patientId);
-      
-        self.$http.post('/swing/image', formData)
-        .then((data) => {
-          const imgdata = JSON.parse(data);
-          
-          debugger;
-          self.src = 'data:image/png;base64,' + imgdata.img;
+        self.$http.post('/image', formData)
+        .then((res) => {
+          self.isLoadingImg = false;
+          const data = res.data;
+          self.src = 'data:image/png;base64,' + data.image;
+          const obj = {
+            src: 'data:image/png;base64,' + data.image,
+            type: data.imageType,
+            id: data.imageUid
+          };
+          self.afterImageData.push(obj);
 
         }).catch((err) => {
           console.log(err);
@@ -587,21 +594,42 @@
         arr[0] = uuid;
         const params = {
           uuids: arr
-        };
-        debugger;
-        self.$http.delete('/swing/image', {data: params})
-        .then((res) => {
-          debugger;
+        }
+        self.$http.post('/image/multipleDelete', params)
+        .then(() => {
           if(type === "intraOperative") {
             self.intraImageData.splice(index, 1);
           } else if(type === "preOperative") {
             self.preImageData.splice(index, 1);
           } else if(type === "postOperative") {
             self.afterImageData.splice(index, 1);
-          };
+          }
         }).catch((err) => {
           console.log(err);
-        })
+        });
+      },
+      resetForm() {
+        this.hospitalNum = ''; //住院号
+        this.currentCaseId = ""; // 默认医生信息
+        this.currentCaseName = [];
+        this.zdData =  [];//当前选择诊断部位数据
+        this.ssfsData =  [];//当前选中手术方式
+        this.zlfsData = [];//当前选中治疗方式
+        this.zljgData =  [];//当前选中治疗结果
+        this.patientName =  '';//病人姓名
+        this.sex =  0; // 病人性别
+        this.age =  '';
+        this.photoNum =  ''; // 联系方式
+        this.ryDate =  ''; // 入院日期
+        this.remarks =  ''; // 备注
+        this.fileList =  [];
+        this.floderName =  '';
+        this.patientId =  '';//病人id
+        this.preImageData =  [];//术前图片文件对象
+        this.intraImageData =  [];
+        this.afterImageData =  [];
+        this.allImageData =  [];
+        this.imgNumber =  0;
       }
     },
   };
@@ -666,6 +694,26 @@
   }
   .photo-box {
     margin: 0 15px;
+    position: relative;
+    .mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-color: rgba(0,0,0,.3);
+      text-align: center;
+      z-index: 9999;
+      .spin-icon {
+        top: 45%;
+        position: relative;
+      }
+      .upload-explain {
+        margin-top: 200px;
+        color: #ddd;
+        font-size: 20px;
+      }
+    }
     .photo-item {
       padding-left: 100px;
       margin-top: 15px;
