@@ -266,6 +266,7 @@
         age: '',
         photoNum: '', // 联系方式
         ryDate: '', // 入院日期
+        ryDetailDate: '',
         remarks: '', // 备注
         fileList: [],
         floderName: '',
@@ -482,14 +483,15 @@
       },
       // 入院日期 
       onDateChange(item, datestring) {
-        this.ryDate = datestring;
+        this.ryDate = item;
+        this.ryDetailDate = datestring;
       },
       // 点击确定
       handleUpload() {
         const self = this;
         // 上传信息
         const params = {
-          "admissionDate": self.ryDate,
+          "admissionDate": self.ryDetailDate,
           "attendingDoctorId": self.currentCaseId,
           "caseNo": self.patientId,
           "diagnosis": self.zdData,
@@ -621,6 +623,7 @@
         this.age =  '';
         this.photoNum =  ''; // 联系方式
         this.ryDate =  ''; // 入院日期
+        this.ryDetailDate = '';
         this.remarks =  ''; // 备注
         this.fileList =  [];
         this.floderName =  '';
