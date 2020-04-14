@@ -606,8 +606,10 @@
           } else if(type === "postOperative") {
             self.afterImageData.splice(index, 1);
           }
+          self.$message.success('删除成功');
         }).catch((err) => {
           console.log(err);
+          self.$message.error('删除失败');
         });
       },
       resetForm() {
