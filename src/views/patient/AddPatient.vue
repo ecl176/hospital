@@ -1,244 +1,244 @@
 <template>
-    <div class='patient-content'>
+  <div class='patient-content'>
     <p class="head-title">
       <span>病人信息登记</span>
     </p>
-      <div class="upload-box">
-        <a-upload-dragger
-            name="file"
-            :multiple="true"
-            directory
-            :beforeUpload="beforeUpload"
-            :customRequest = 'customRequest'
-            @change="handleUploadChange"
-        >
-            <p class="ant-upload-drag-icon">
-            <a-icon type="inbox" />
-            </p>
-            <p class="ant-upload-text">点击或者将文件拖拽至此进行上传</p>
-        </a-upload-dragger>
+    <div class="upload-box">
+      <a-upload-dragger
+          name="file"
+          :multiple="true"
+          directory
+          :beforeUpload="beforeUpload"
+          :customRequest = 'customRequest'
+          @change="handleUploadChange"
+      >
+          <p class="ant-upload-drag-icon">
+          <a-icon type="inbox" />
+          </p>
+          <p class="ant-upload-text">点击或者将文件拖拽至此进行上传</p>
+      </a-upload-dragger>
+    </div>
+    <div class="form-box">
+      <a-row :gutter="16">
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">住院号</label>
+            <a-input placeholder="请输入住院号" v-model='hospitalNum' disabled style="color:'#333'"/>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">主治医师</label>
+            <a-select style="width:100%;" @change="handleCaseChange" :value="currentCaseName" placeholder="请选择主治医生">
+              <a-select-option v-for="(item, index) in caseData" :key="index"
+                >{{item}}</a-select-option
+              >
+            </a-select>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">病人姓名</label>
+            <a-input placeholder="请输入病人姓名" v-model='patientName' />
+          </div>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box sex">
+            <label class="label">性别</label>
+            <a-radio-group v-model="sex">
+              <a-radio :value="0">男</a-radio>
+              <a-radio :value="1">女</a-radio>
+            </a-radio-group>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">病人年龄</label>
+            <a-input placeholder="请输入病人年龄" v-model='age'/>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">诊断</label>
+            <a-select
+              mode="tags"
+              style="width: 100%"
+              @change="handleZdbwChange"
+              placeholder="请选择诊断部位"
+              :defaultValue="zdData"
+              :value="zdData"
+              >
+              <a-select-option v-for="(item, index) in allZdData" :key="index" :value="item">
+                {{item}}
+              </a-select-option>
+            </a-select>
+          </div>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">手术方式</label>
+            <a-select
+              mode="tags"
+              style="width: 100%"
+              @change="handleSsfsChange"
+              placeholder="请选择手术方式"
+              :value="ssfsData"
+              >
+              <a-select-option v-for="(item, index) in allSsfsData" :key="index" :value="item">
+                {{item}}
+              </a-select-option>
+            </a-select>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">治疗方式</label>
+            <a-select
+              mode="tags"
+              style="width: 100%"
+              @change="handleZlfsChange"
+              placeholder="请选择治疗方式"
+              :defaultValue="zlfsData"
+              :value="zlfsData"
+              >
+              <a-select-option v-for="(item, index) in allZlfsData" :key="index" :value="item">
+                {{item}}
+              </a-select-option>
+            </a-select>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">治疗结果</label>
+            <a-select
+              mode="tags"
+              style="width: 100%"
+              @change="handleZljgChange"
+              placeholder="请选择治疗结果"
+              :defaultValue="zljgData"
+              :value="zljgData"
+              >
+              <a-select-option v-for="(item, index) in allZljgData" :key="index" :value="item">
+                {{item}}
+              </a-select-option>
+            </a-select>
+          </div>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">联系电话</label>
+            <a-input placeholder="请输入联系电话" v-model="photoNum" />
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">入院日期</label>
+            <a-date-picker @change="onDateChange" v-model="ryDate" style="width:100%;" placeholder="请选择入院日期">
+            </a-date-picker>
+          </div>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col class="gutter-row" :span="24">
+          <div class="gutter-box">
+            <label class="label remarks">备注</label>
+            
+            <a-textarea
+              v-model="remarks"
+              placeholder="请添加备注"
+              :autoSize="{ minRows: 2, maxRows: 5 }"
+            />
+          </div>
+        </a-col>
+      </a-row>
+    </div>
+    <div class="photo-box">
+      <div class="mask" v-show="isLoadingImg">
+        <a-spin tip="图片上传中请稍等..." size="large" class="spin-icon">
+        </a-spin>
       </div>
-      <div class="form-box">
-        <a-row :gutter="16">
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">住院号</label>
-              <a-input placeholder="请输入住院号" v-model='hospitalNum' disabled style="color:'#333'"/>
+      <div class="photo-item">
+        <label>术前</label>
+        <div class="upload-img-btn">
+          <a-upload
+            listType="picture-card"
+            class="avatar-uploader"
+            :showUploadList="false"
+            accept="image/*"
+            :customRequest='beforeImgUpload'
+          >
+            <div>
+              <a-icon type="plus" />
+              <div class="ant-upload-text">上传</div>
             </div>
-          </a-col>
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">主治医师</label>
-              <a-select style="width:100%;" @change="handleCaseChange" :value="currentCaseName" placeholder="请选择主治医生">
-                <a-select-option v-for="(item, index) in caseData" :key="index"
-                  >{{item}}</a-select-option
-                >
-              </a-select>
-            </div>
-          </a-col>
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">病人姓名</label>
-              <a-input placeholder="请输入病人姓名" v-model='patientName' />
-            </div>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box sex">
-              <label class="label">性别</label>
-              <a-radio-group v-model="sex">
-                <a-radio :value="0">男</a-radio>
-                <a-radio :value="1">女</a-radio>
-              </a-radio-group>
-            </div>
-          </a-col>
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">病人年龄</label>
-              <a-input placeholder="请输入病人年龄" v-model='age'/>
-            </div>
-          </a-col>
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">诊断</label>
-              <a-select
-                mode="tags"
-                style="width: 100%"
-                @change="handleZdbwChange"
-                placeholder="请选择诊断部位"
-                :defaultValue="zdData"
-                :value="zdData"
-                >
-                <a-select-option v-for="(item, index) in allZdData" :key="index" :value="item">
-                  {{item}}
-                </a-select-option>
-              </a-select>
-            </div>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">手术方式</label>
-              <a-select
-                mode="tags"
-                style="width: 100%"
-                @change="handleSsfsChange"
-                placeholder="请选择手术方式"
-                :value="ssfsData"
-                >
-                <a-select-option v-for="(item, index) in allSsfsData" :key="index" :value="item">
-                  {{item}}
-                </a-select-option>
-              </a-select>
-            </div>
-          </a-col>
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">治疗方式</label>
-              <a-select
-                mode="tags"
-                style="width: 100%"
-                @change="handleZlfsChange"
-                placeholder="请选择治疗方式"
-                :defaultValue="zlfsData"
-                :value="zlfsData"
-                >
-                <a-select-option v-for="(item, index) in allZlfsData" :key="index" :value="item">
-                  {{item}}
-                </a-select-option>
-              </a-select>
-            </div>
-          </a-col>
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">治疗结果</label>
-              <a-select
-                mode="tags"
-                style="width: 100%"
-                @change="handleZljgChange"
-                placeholder="请选择治疗结果"
-                :defaultValue="zljgData"
-                :value="zljgData"
-                >
-                <a-select-option v-for="(item, index) in allZljgData" :key="index" :value="item">
-                  {{item}}
-                </a-select-option>
-              </a-select>
-            </div>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">联系电话</label>
-              <a-input placeholder="请输入联系电话" v-model="photoNum" />
-            </div>
-          </a-col>
-          <a-col class="gutter-row" :span="8">
-            <div class="gutter-box">
-              <label class="label">入院日期</label>
-              <a-date-picker @change="onDateChange" v-model="ryDate" style="width:100%;" placeholder="请选择入院日期">
-              </a-date-picker>
-            </div>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col class="gutter-row" :span="24">
-            <div class="gutter-box">
-              <label class="label remarks">备注</label>
-              
-              <a-textarea
-                v-model="remarks"
-                placeholder="请添加备注"
-                :autoSize="{ minRows: 2, maxRows: 5 }"
-              />
-            </div>
-          </a-col>
-        </a-row>
-      </div>
-      <div class="photo-box">
-        <div class="mask" v-show="isLoadingImg">
-          <a-spin tip="图片上传中请稍等..." size="large" class="spin-icon">
-          </a-spin>
+          </a-upload>
         </div>
-        <div class="photo-item">
-          <label>术前</label>
-          <div class="upload-img-btn">
-            <a-upload
-              listType="picture-card"
-              class="avatar-uploader"
-              :showUploadList="false"
-              accept="image/*"
-              :customRequest='beforeImgUpload'
-            >
-              <div>
-                <a-icon type="plus" />
-                <div class="ant-upload-text">上传</div>
-              </div>
-            </a-upload>
-          </div>
-          <div class="items-list" v-for="(item, index) in preImageData" :key="item.id">
-            <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
-              <a-icon type="delete" />
-            </a-button>
-            <img :src="item.src" alt="">
-          </div>
-        </div>
-        <div class="photo-item">
-          <label>术中</label>
-          <div class="upload-img-btn">
-            <a-upload
-              listType="picture-card"
-              class="avatar-uploader"
-              :showUploadList="false"
-              accept="image/*"
-              :customRequest="intraImgUpload"
-            >
-              <div>
-                <a-icon type="plus" />
-                <div class="ant-upload-text">上传</div>
-              </div>
-            </a-upload>
-          </div>
-          <div class="items-list" v-for="(item, index) in intraImageData" :key="item.id">
-            <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
-              <a-icon type="delete" />
-            </a-button>
-            <img :src="item.src" alt="">
-          </div>
-        </div>
-        <div class="photo-item">
-          <label>术后</label>
-          <div class="upload-img-btn">
-            <a-upload
-              listType="picture-card"
-              class="avatar-uploader"
-              :showUploadList="false"
-              accept="image/*"
-              :customRequest="afterImgUpload"
-            >
-              <div>
-                <a-icon type="plus" />
-                <div class="ant-upload-text">上传</div>
-              </div>
-            </a-upload>
-          </div>
-          <div class="items-list" v-for="(item, index) in afterImageData" :key="item.id">
-            <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
-              <a-icon type="delete" />
-            </a-button>
-            <img :src="item.src" alt="">
-          </div>
+        <div class="items-list" v-for="(item, index) in preImageData" :key="item.id">
+          <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
+            <a-icon type="delete" />
+          </a-button>
+          <img :src="item.src" alt="">
         </div>
       </div>
-      <div class="btn-list">
-        <a-button type="primary" @click="handleUpload">确定</a-button>
-        <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
-        
+      <div class="photo-item">
+        <label>术中</label>
+        <div class="upload-img-btn">
+          <a-upload
+            listType="picture-card"
+            class="avatar-uploader"
+            :showUploadList="false"
+            accept="image/*"
+            :customRequest="intraImgUpload"
+          >
+            <div>
+              <a-icon type="plus" />
+              <div class="ant-upload-text">上传</div>
+            </div>
+          </a-upload>
+        </div>
+        <div class="items-list" v-for="(item, index) in intraImageData" :key="item.id">
+          <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
+            <a-icon type="delete" />
+          </a-button>
+          <img :src="item.src" alt="">
+        </div>
+      </div>
+      <div class="photo-item">
+        <label>术后</label>
+        <div class="upload-img-btn">
+          <a-upload
+            listType="picture-card"
+            class="avatar-uploader"
+            :showUploadList="false"
+            accept="image/*"
+            :customRequest="afterImgUpload"
+          >
+            <div>
+              <a-icon type="plus" />
+              <div class="ant-upload-text">上传</div>
+            </div>
+          </a-upload>
+        </div>
+        <div class="items-list" v-for="(item, index) in afterImageData" :key="item.id">
+          <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
+            <a-icon type="delete" />
+          </a-button>
+          <img :src="item.src" alt="">
+        </div>
       </div>
     </div>
+    <div class="btn-list">
+      <a-button type="primary" @click="handleUpload">确定</a-button>
+      <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
+      
+    </div>
+  </div>
 </template>
 <script>
   // const allZdData = ['头部','脸部','腿部','胳膊'];//所有诊断数据
@@ -503,13 +503,16 @@
           "treatmentMethod": self.zlfsData,
           "treatmentOutcome": self.zljgData
         };
-        self.$http.post('/image/multipleDelete', params)
-        .then((res) => {
-          console.log(res);
-          self.$message.success('上传成功');
-        }).catch((err) => {
-          console.log(err);
-        });
+        console.log(params);
+        self.$message.success('上传成功');
+        self.resetForm();
+        // self.$http.post('/image/multipleDelete', params)
+        // .then((res) => {
+        //   console.log(res);
+        //   self.$message.success('上传成功');
+        // }).catch((err) => {
+        //   console.log(err);
+        // });
       },
       //清除上传文件夹上传图片数据
       clearImgData() {

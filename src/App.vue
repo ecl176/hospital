@@ -65,6 +65,7 @@ moment.locale('zh-cn');
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+  height: 100%;
 }
 </style>
 <style lang="scss" scoped>
@@ -83,6 +84,7 @@ moment.locale('zh-cn');
   .right-content {
     float: left;
     width: 100%;
+    height: 100%;
   }
 }
 
