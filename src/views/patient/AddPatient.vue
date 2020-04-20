@@ -375,7 +375,6 @@
           self.afterImageData = [];
           self.allImageData = [];
           self.floderName = file.webkitRelativePath.split('/')[0].split(conf.folderNameSeparator);
-          debugger;
           self.patientId = self.floderName[0];
           self.floderName.forEach((item, index) => {
             self.floderName[index] = item.trim().replace('岁','');
