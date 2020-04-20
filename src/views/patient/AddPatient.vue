@@ -245,6 +245,7 @@
   // const allSsfsData = ['开刀','切割'];//所有手术方式数据
   // const allZlfsData = ['药物治疗','手术'];//所有治疗方式数据
   // const allZljgData = ['好转','出院','安全康复']// 所有治疗结果数据
+  const conf = require('../../assets/common/config')
   export default {
     data() {
       return {
@@ -373,12 +374,13 @@
           self.intraImageData = [];
           self.afterImageData = [];
           self.allImageData = [];
-          self.floderName = file.webkitRelativePath.split('/')[0].split('，');
+          self.floderName = file.webkitRelativePath.split('/')[0].split(conf.folderNameSeparator);
+          debugger;
           self.patientId = self.floderName[0];
           self.floderName.forEach((item, index) => {
             self.floderName[index] = item.trim().replace('岁','');
           });
-          self.floderName = self.floderName.join('_');
+          self.floderName = self.floderName.join(conf.folderNameSeparator);
           self.uploadPatientName(self.floderName);
         }
       },
@@ -703,6 +705,7 @@
         this.afterImageData =  [];
         this.allImageData =  [];
         this.imgNumber =  0;
+        this.isLoadingImg = false;
       }
     },
   };
