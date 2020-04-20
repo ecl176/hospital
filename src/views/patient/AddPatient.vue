@@ -291,7 +291,7 @@
       // 获取所有医生信息
       getCaseData() {
         const self = this;
-        this.$http.get('/doctor/all').then((res) => {
+        self.$http.get('/doctor/all').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
@@ -309,6 +309,7 @@
         this.$http.get('/dictionary/DIAGNOSIS_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
+            self.allZdData = [];
             data.forEach((item) => {
               self.allZdData.push(item.value);
             });
@@ -323,6 +324,7 @@
         this.$http.get('/dictionary/OPERATION_NAME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
+            self.allSsfsData = [];
             data.forEach((item) => {
               self.allSsfsData.push(item.value);
             });
@@ -337,6 +339,7 @@
         this.$http.get('/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
+            self.allZlfsData = [];
             data.forEach((item) => {
               self.allZlfsData.push(item.value);
             });
@@ -351,6 +354,7 @@
         this.$http.get('/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
+            self.allZljgData = [];
             data.forEach((item) => {
               self.allZljgData.push(item.value);
             });
@@ -370,6 +374,7 @@
           self.afterImageData = [];
           self.allImageData = [];
           self.floderName = file.webkitRelativePath.split('/')[0].split('，');
+          self.patientId = self.floderName[0];
           self.floderName.forEach((item, index) => {
             self.floderName[index] = item.trim().replace('岁','');
           });
@@ -436,17 +441,18 @@
         .then(function(res) {
           if(res.status == 200) {
             self.floderName = '';
-            const data = res.data;
-            self.hospitalNum = data.caseNo;// 住院号
-            self.patientId = data.caseNo; // id
-            self.patientName = data.patientName; //姓名
-            self.sex = data.patientGender === '男' ? 0 : 1;
-            self.age = data.patientAge; // 年龄
-            self.zdData = [];
-            self.zdData.push(data.diagnosis);// 诊断
-            self.ssfsData = [];
-            self.ssfsData.push(data.operationName); // 手术方式
-            self.uploadAllImage();
+            // const data = res.data;
+            // self.hospitalNum = data.caseNo;// 住院号
+            // self.patientId = data.caseNo; // id
+            // self.patientName = data.patientName; //姓名
+            // self.sex = data.patientGender === '男' ? 0 : 1;
+            // self.age = data.patientAge; // 年龄
+            // self.zdData = [];
+            // self.zdData.push(data.diagnosis);// 诊断
+            // self.ssfsData = [];
+            // self.ssfsData.push(data.operationName); // 手术方式
+            // 获取病人信息
+            self.getPatientInfo();
           }
         }).catch((err) => {
           self.floderName = '';
@@ -455,6 +461,31 @@
           } else {
             self.$message.error('上传文件夹命名不规范，请重新上传');
           }
+        });
+      },
+      // 获取病人信息
+      getPatientInfo() {
+        const self = this;
+        self.$http.get('/patientcase/' + self.patientId).then((res) => {
+          if(res.status === 200) {
+            const data = res.data;
+            self.hospitalNum = data.caseNo;// 住院号
+            self.patientId = data.caseNo; // id
+            self.patientName = data.patientName; //姓名
+            self.sex = data.patientGender === '男' ? 0 : 1;
+            self.age = data.patientAge; // 年龄
+            self.zdData = [];
+            data.diagnosis.forEach((item) => {
+              self.zdData.push(item.dictionaryValue);// 诊断
+            })
+            self.ssfsData = [];
+            data.operationName.forEach((item) => {
+              self.ssfsData.push(item.dictionaryValue); // 手术方式
+            })
+            self.uploadAllImage();
+          }
+        }).catch(() => {
+          self.$message.error('请求失败');
         });
       },
       // 选择主治医师
@@ -503,16 +534,50 @@
           "treatmentMethod": self.zlfsData,
           "treatmentOutcome": self.zljgData
         };
-        console.log(params);
-        self.$message.success('上传成功');
-        self.resetForm();
-        // self.$http.post('/image/multipleDelete', params)
-        // .then((res) => {
-        //   console.log(res);
-        //   self.$message.success('上传成功');
-        // }).catch((err) => {
-        //   console.log(err);
-        // });
+        if(params.admissionDate === '') {
+          self.$message.error('请输入入院日期');
+          return false;
+        }
+        if(params.attendingDoctorId === '') {
+          self.$message.error('请选择主治医生');
+          return false;
+        }
+        if(params.diagnosis.length === 0) {
+          self.$message.error('请选择诊断部位');
+          return false;
+        }
+        if(params.operationName.length === 0) {
+          self.$message.error('请选择手术方式');
+          return false;
+        }
+        if(params.patientName === '') {
+          self.$message.error('请输入病人姓名');
+          return false;
+        }
+        if(params.phoneNumber === '') {
+          self.$message.error('请输入病人联系电话');
+          return false;
+        }
+        if(params.treatmentMethod.length === 0) {
+          self.$message.error('请选择治疗方式');
+          return false;
+        }
+        if(params.treatmentOutcome.length === 0) {
+          self.$message.error('请选择治疗结果');
+          return false;
+        }
+        self.$http.post('/patientcase/addition', params)
+        .then(() => {
+          self.resetForm();
+          self.$message.success('上传成功');
+          window.scrollTo(0, 0);
+          self.getDiagnosisData();//获取所有诊断数据
+          self.getOperationData();// 获取所有手术方式数据
+          self.getTreatmentMethodData();// 获取所有治疗方式数据
+          self.getTreatmentOutcomeData();
+        }).catch((err) => {
+          console.log(err);
+        });
       },
       //清除上传文件夹上传图片数据
       clearImgData() {
