@@ -37,8 +37,6 @@
     </div>
     <div class="table-btns">
       <a-button type="primary" @click="handleSearch">删除</a-button>
-      <a-button type="primary" @click="handleSearch">导出</a-button>
-      <a-button type="primary" @click="handleSearch">打印</a-button>
     </div>
     <div class="table-box">
       <a-table 

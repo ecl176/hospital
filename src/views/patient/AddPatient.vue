@@ -30,7 +30,7 @@
           <div class="gutter-box">
             <label class="label">主治医师</label>
             <a-select style="width:100%;" @change="handleCaseChange" :value="currentCaseName" placeholder="请选择主治医生">
-              <a-select-option v-for="(item, index) in caseData" :key="index"
+              <a-select-option v-for="(item, index) in caseData" :key="index" :value="item"
                 >{{item}}</a-select-option
               >
             </a-select>
@@ -236,7 +236,6 @@
     <div class="btn-list">
       <a-button type="primary" @click="handleUpload">确定</a-button>
       <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
-      
     </div>
   </div>
 </template>
@@ -492,9 +491,15 @@
       // 选择主治医师
       handleCaseChange(index) {
         const self = this;
-        self.currentCaseId = self.allCaseData[index].doctorId;
+        // self.currentCaseId = self.allCaseData[index].doctorId;
+        self.allCaseData.forEach((item) => {
+          if(item.doctorName === index) {
+            self.currentCaseId = item.doctorId;
+          }
+        })
         self.currentCaseName = [];
-        self.currentCaseName.push(self.allCaseData[index].doctorName)
+        // self.currentCaseName.push(self.allCaseData[index].doctorName);
+        self.currentCaseName.push(index);
       },
       // 诊断部位选择
       handleZdbwChange(selectedItems) {

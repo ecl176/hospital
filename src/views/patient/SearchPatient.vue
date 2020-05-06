@@ -8,14 +8,14 @@
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">住院号</label>
-            <a-input placeholder="请输入住院号" v-model='hospitalNum'/>
+            <a-input placeholder="请输入住院号" v-model='searchObj.hospitalNum'/>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">主治医师</label>
-            <a-select :defaultValue="currentCaseName" style="width:100%;" @change="handleCaseChange">
-              <a-select-option v-for="(item, index) in caseData" :key="index"
+            <a-select style="width:100%;" @change="handleSearchCaseChange" placeholder="请选择主治医生">
+              <a-select-option v-for="(item, index) in caseData" :key="index" :value="item"
                 >{{item}}</a-select-option
               >
             </a-select>
@@ -24,35 +24,62 @@
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">病人姓名</label>
-            <a-input placeholder="请输入病人姓名" v-model='patientName' />
+            <a-input placeholder="请输入病人姓名" v-model='searchObj.patientName' />
           </div>
         </a-col>
+      </a-row>
+      <a-row :gutter="16">
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box sex">
             <label class="label">性别</label>
-            <a-radio-group v-model="sex" >
-              <a-radio :value="1">男</a-radio>
-              <a-radio :value="2">女</a-radio>
+            <a-radio-group v-model="searchObj.sex" >
+              <a-radio :value="0">男</a-radio>
+              <a-radio :value="1">女</a-radio>
             </a-radio-group>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">病人年龄</label>
-            <a-input placeholder="请输入病人年龄" v-model='age' style="height: 30px;" />
+            <label class="label">病人起始年龄</label>
+            <a-input placeholder="请输入病人年龄" v-model='searchObj.startage' />
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
+            <label class="label">病人终止年龄</label>
+            <a-input placeholder="请输入病人年龄" v-model='searchObj.endage'/>
+          </div>
+        </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
             <label class="label">诊断</label>
             <a-select
-              mode="multiple"
+              mode="tags"
+              style="width: 100%"
+              @change="handleSearchZdbwChange"
               placeholder="请选择诊断部位"
-              :value="zdbwText"
-              @change="handleZdbwChange"
-              style="width: 100%;height:30px"
-            >
-              <a-select-option v-for="(item, index) in zdbwData" :key="index" :value="item">
+              :defaultValue="searchObj.zdData"
+              :value="searchObj.zdData"
+              >
+              <a-select-option v-for="(item, index) in allZdData" :key="index" :value="item">
+                {{item}}
+              </a-select-option>
+            </a-select>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">手术方式</label>
+            <a-select
+              mode="tags"
+              style="width: 100%"
+              @change="handleSearchSsfsChange"
+              placeholder="请选择手术方式"
+              :value="searchObj.ssfsData"
+              >
+              <a-select-option v-for="(item, index) in allSsfsData" :key="index" :value="item">
                 {{item}}
               </a-select-option>
             </a-select>
@@ -61,19 +88,50 @@
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">治疗方式</label>
-            <a-input placeholder="请输入治疗方式" v-model='zlfsText'/>
+            <a-select
+              mode="tags"
+              style="width: 100%"
+              @change="handleSearchZlfsChange"
+              placeholder="请选择治疗方式"
+              :defaultValue="searchObj.zlfsData"
+              :value="searchObj.zlfsData"
+              >
+              <a-select-option v-for="(item, index) in allZlfsData" :key="index" :value="item">
+                {{item}}
+              </a-select-option>
+            </a-select>
           </div>
         </a-col>
+      </a-row>
+      <a-row :gutter='16'>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">治疗结果</label>
-            <a-input placeholder="请输入追了结果" v-model='zljgText' />
+            <a-select
+              mode="tags"
+              style="width: 100%"
+              @change="handleSearchZljgChange"
+              placeholder="请选择治疗结果"
+              :defaultValue="searchObj.zljgData"
+              :value="searchObj.zljgData"
+              >
+              <a-select-option v-for="(item, index) in allZljgData" :key="index" :value="item">
+                {{item}}
+              </a-select-option>
+            </a-select>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">入院日期</label>
-            <a-date-picker @change="onDateChange" style="width:100%;" placeholder="请选择入院日期">
+            <label class="label">入院起始日期</label>
+            <a-date-picker @change="onSearchDateChange" v-model="searchObj.ryStartDate" style="width:100%;" placeholder="请选择入院日期">
+            </a-date-picker>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">入院终止日期</label>
+            <a-date-picker @change="onSearchEndDateChange" v-model="searchObj.ryEndDate" style="width:100%;" placeholder="请选择入院日期">
             </a-date-picker>
           </div>
         </a-col>
@@ -95,46 +153,350 @@
         :pagination= 'false'
         size="middle"
         :rowSelection="rowSelection"
+        :scroll="{ x: 1600 }"
       >
       <div slot="opts" slot-scope="opts, record" class="opt-btns">
         <a-button type="primary" v-for="item in opts" :key="item.text" size="small" @click="hancleOpt(record.key, item.type)">{{item.text}}</a-button>
       </div>
       </a-table>
     </div>
+    <a-modal
+      title="查看病人信息"
+      :visible="checkPatientInfoVisible"
+      :footer="null"
+      :width = '1000'
+      @cancel = "closeInfoModal"
+      :maskClosable='false'
+      style="top: 20px;"
+      >
+      <table class="info-table">
+        <tr>
+          <td>住院号</td>
+          <td>{{checkObj.caseNo}}</td>
+          <td>主治医师</td>
+          <td>{{checkObj.doctor}}</td>
+          <td>诊断</td>
+          <td>{{checkObj.diagnosis}}</td>
+        </tr>
+        <tr>
+          <td>病人姓名</td>
+          <td>{{checkObj.patientName}}</td>
+          <td>性别</td>
+          <td>{{checkObj.patientGender}}</td>
+          <td>年龄</td>
+          <td>{{checkObj.patientAge}}</td>
+        </tr>
+        <tr>
+          <td>治疗方式</td>
+          <td>{{checkObj.treatmentMethod}}</td>
+          <td>治疗结果</td>
+          <td>{{checkObj.treatmentOutcome}}</td>
+          <td>入院日期</td>
+          <td>{{checkObj.admissionDate}}</td>
+        </tr>
+      </table>
+      <div class="check-modal-photo-box">
+        <div class="photo-item">
+          <label>术前</label>
+          <div class="items-list" v-for="(item) in checkPreImageData" :key="item.id">
+            <img :src="item.src" alt="">
+          </div>
+        </div>
+        <div class="photo-item">
+          <label>术中</label>
+          <div class="items-list" v-for="(item) in checkIntraImageData" :key="item.id">
+            <img :src="item.src" alt="">
+          </div>
+        </div>
+        <div class="photo-item">
+          <label>术后</label>
+          <div class="items-list" v-for="(item) in checkAfterImageData" :key="item.id">
+            <img :src="item.src" alt="">
+          </div>
+        </div>
+      </div>
+    </a-modal>
+    <a-modal
+      v-model="delModalVisible"
+      title=""
+      @ok="handleDelInfo"
+      @cancel="handleCloseDelModatl"
+      >
+      <p style="text-align:center;font-size:16px;margin: 10px 0 0">确定删除当前病人信息吗</p>
+    </a-modal>
+    <a-modal
+      v-model="editModalVisible"
+      title="编辑病人信息"
+      @ok="handleEditInfo"
+      @cancel="handleCloseEditModal"
+      :width = '1000'
+      :maskClosable='false'
+      style="top: 20px;"
+      >
+      <div class="edit-info-box">
+        <div class="form-box">
+          <a-row :gutter="16">
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">住院号</label>
+                <a-input placeholder="请输入住院号" v-model='editObj.hospitalNum' disabled style="color:'#333'"/>
+              </div>
+            </a-col>
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">主治医师</label>
+                <a-select style="width:100%;" @change="handleEditCaseChange" :value="editObj.currentCaseName" placeholder="请选择主治医生">
+                  <a-select-option v-for="(item, index) in caseData" :key="index"
+                    >{{item}}</a-select-option
+                  >
+                </a-select>
+              </div>
+            </a-col>
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">病人姓名</label>
+                <a-input placeholder="请输入病人姓名" v-model='editObj.patientName' />
+              </div>
+            </a-col>
+          </a-row>
+          <a-row :gutter="16">
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box sex">
+                <label class="label">性别</label>
+                <a-radio-group v-model="editObj.sex">
+                  <a-radio :value="0">男</a-radio>
+                  <a-radio :value="1">女</a-radio>
+                </a-radio-group>
+              </div>
+            </a-col>
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">病人年龄</label>
+                <a-input placeholder="请输入病人年龄" v-model='editObj.age'/>
+              </div>
+            </a-col>
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">诊断</label>
+                <a-select
+                  mode="tags"
+                  style="width: 100%"
+                  @change="handleEditZdbwChange"
+                  placeholder="请选择诊断部位"
+                  :defaultValue="editObj.zdData"
+                  :value="editObj.zdData"
+                  >
+                  <a-select-option v-for="(item, index) in allZdData" :key="index" :value="item">
+                    {{item}}
+                  </a-select-option>
+                </a-select>
+              </div>
+            </a-col>
+          </a-row>
+          <a-row :gutter="16">
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">手术方式</label>
+                <a-select
+                  mode="tags"
+                  style="width: 100%"
+                  @change="handleEditSsfsChange"
+                  placeholder="请选择手术方式"
+                  :value="editObj.ssfsData"
+                  >
+                  <a-select-option v-for="(item, index) in allSsfsData" :key="index" :value="item">
+                    {{item}}
+                  </a-select-option>
+                </a-select>
+              </div>
+            </a-col>
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">治疗方式</label>
+                <a-select
+                  mode="tags"
+                  style="width: 100%"
+                  @change="handleEditZlfsChange"
+                  placeholder="请选择治疗方式"
+                  :defaultValue="editObj.zlfsData"
+                  :value="editObj.zlfsData"
+                  >
+                  <a-select-option v-for="(item, index) in allZlfsData" :key="index" :value="item">
+                    {{item}}
+                  </a-select-option>
+                </a-select>
+              </div>
+            </a-col>
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">治疗结果</label>
+                <a-select
+                  mode="tags"
+                  style="width: 100%"
+                  @change="handleEditZljgChange"
+                  placeholder="请选择治疗结果"
+                  :defaultValue="editObj.zljgData"
+                  :value="editObj.zljgData"
+                  >
+                  <a-select-option v-for="(item, index) in allZljgData" :key="index" :value="item">
+                    {{item}}
+                  </a-select-option>
+                </a-select>
+              </div>
+            </a-col>
+          </a-row>
+          <a-row :gutter="16">
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">联系电话</label>
+                <a-input placeholder="请输入联系电话" v-model="editObj.photoNum" />
+              </div>
+            </a-col>
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">入院日期</label>
+                <a-date-picker @change="onEditDateChange" v-model="editObj.ryDate" style="width:100%;" placeholder="请选择入院日期">
+                </a-date-picker>
+              </div>
+            </a-col>
+          </a-row>
+          
+        </div>
+        <div class="photo-box">
+          <div class="mask" v-show="editObj.isLoadingImg">
+            <a-spin tip="图片上传中请稍等..." size="large" class="spin-icon">
+            </a-spin>
+          </div>
+          <div class="photo-item">
+            <label>术前</label>
+            <div class="upload-img-btn">
+              <a-upload
+                listType="picture-card"
+                class="avatar-uploader"
+                :showUploadList="false"
+                accept="image/*"
+                :customRequest='beforeImgUpload'
+              >
+                <div>
+                  <a-icon type="plus" />
+                  <div class="ant-upload-text">上传</div>
+                </div>
+              </a-upload>
+            </div>
+            <div class="items-list" v-for="(item, index) in editObj.preImageData" :key="item.id">
+              <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
+                <a-icon type="delete" />
+              </a-button>
+              <img :src="item.src" alt="">
+            </div>
+          </div>
+          <div class="photo-item">
+            <label>术中</label>
+            <div class="upload-img-btn">
+              <a-upload
+                listType="picture-card"
+                class="avatar-uploader"
+                :showUploadList="false"
+                accept="image/*"
+                :customRequest="intraImgUpload"
+              >
+                <div>
+                  <a-icon type="plus" />
+                  <div class="ant-upload-text">上传</div>
+                </div>
+              </a-upload>
+            </div>
+            <div class="items-list" v-for="(item, index) in editObj.intraImageData" :key="item.id">
+              <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
+                <a-icon type="delete" />
+              </a-button>
+              <img :src="item.src" alt="">
+            </div>
+          </div>
+          <div class="photo-item">
+            <label>术后</label>
+            <div class="upload-img-btn">
+              <a-upload
+                listType="picture-card"
+                class="avatar-uploader"
+                :showUploadList="false"
+                accept="image/*"
+                :customRequest="afterImgUpload"
+              >
+                <div>
+                  <a-icon type="plus" />
+                  <div class="ant-upload-text">上传</div>
+                </div>
+              </a-upload>
+            </div>
+            <div class="items-list" v-for="(item, index) in editObj.afterImageData" :key="item.id">
+              <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
+                <a-icon type="delete" />
+              </a-button>
+              <img :src="item.src" alt="">
+            </div>
+          </div>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 <script>
-  const caseData = ['张医生','王医生','李医生'];
-  const zdbwData = ['头部','脸部','腿部','胳膊'];
+  import moment from 'moment';
   const columns = [
     {
-      title: '姓名',
-      dataIndex: 'name',
-      align: 'center'
+      title: '住院号',
+      dataIndex: 'caseNo',
+      align: 'center',
     },
     {
       title: '入院日期',
-      dataIndex: 'date',
+      dataIndex: 'admissionDate',
+      align: 'center'
+    },
+    {
+      title: '病人姓名',
+      dataIndex: 'patientName',
+      align: 'center'
+    },
+    {
+      title: '病人年龄',
+      dataIndex: 'patientAge',
+      align: 'center'
+    },
+    {
+      title: '病人性别',
+      dataIndex: 'patientGender',
       align: 'center'
     },
     {
       title: '联系电话',
-      dataIndex: 'phone',
+      dataIndex: 'phoneNumber',
       align: 'center'
     },
     {
-      title: '主治医生',
-      dataIndex: 'case',
+      title: '主治医师',
+      dataIndex: 'doctor',
       align: 'center'
     },
     {
       title: '诊断部位',
-      dataIndex: 'zdbw',
+      dataIndex: 'diagnosis',
       align: 'center'
     },
     {
-      title: '诊断结果',
-      dataIndex: 'zdjg',
+      title: '手术方式',
+      dataIndex: 'operationName',
+      align: 'center'
+    },
+    {
+      title: '治疗方式',
+      dataIndex: 'treatmentMethod',
+      align: 'center'
+    },
+    {
+      title: '治疗结果',
+      dataIndex: 'treatmentOutcome',
       align: 'center'
     },
     {
@@ -143,70 +505,450 @@
       align: 'center',
       scopedSlots: { customRender: 'opts' },
       width: 200,
+      fixed: 'right',
     },
-  ];
-  const tableData = [
-    {
-      key: '1',
-      name: '李丽丽',
-      date: '2020-03-03',
-      phone: '18309876789',
-      case: '李丽丽',
-      zdbw: '头部',
-      zdjg: '暂无',
-      opts: [{
-        text: '查看',
-        type: 'get'
-      },{
-        text: '编辑',
-        type: 'edit'
-      },{
-        text: '删除',
-        type: 'del'
-      },]
-    }
   ];
   export default {
     data() {
       return {
-        hospitalNum: '', //住院号
-        caseData: caseData,//所有医生信息
-        currentCaseName: caseData[0], // 默认医生信息
-        zdbwData: zdbwData,//诊断部位数据
-        patientName: '',//病人姓名
-        sex: 1, // 病人性别
-        age: '',
-        zdbwText: [], // 诊断部位信息
-        zlfsText: '', // 治疗方式
-        zljgText: '', // 治疗结果
+        allCaseData: [],//医生信息
+        caseData: [],
+        allZdData: [],//诊断部位数据
+        allSsfsData: [],//所有手术方式数据
+        allZlfsData: [],//所有治疗方式数据
+        allZljgData: [],//所有治疗结果数据
         columns: columns, // 表格头
-        tableData: tableData, // 表格数据
+        tableData: [], // 表格数据
+        checkPatientInfoVisible: false, //查看病人信息弹窗
+        checkPreImageData:[],//弹窗病人术前照片
+        checkIntraImageData:[],//弹窗病人术中照片
+        checkAfterImageData:[],//弹窗病人术后照片
+        delModalVisible: false,
+        editModalVisible: false,
+        searchObj: {
+          hospitalNum:'',
+          currentCaseName:[],//主治医师
+          patientName: '',// 病人姓名
+          startage:'',
+          endage: '',
+          zdData:[],//诊断部位
+          zlfsData:[],
+          zljgData:[],
+          ssfsData: [],
+          ryStartDate:'',
+          ryStartDetailDate:'',
+          ryEndDate: '',
+          ryEndDetailDate:'',
+          sex: 0,
+          currentCaseId:[],
+        },
+        checkObj: {
+          
+        },
+        editObj: {
+          hospitalNum: '', //住院号
+          currentCaseName: [],
+          currentCaseId: "", // 默认医生信息
+          zdData: [],//当前选择诊断部位数据
+          ssfsData: [],//当前选中手术方式
+          zlfsData:[],//当前选中治疗方式
+          zljgData: [],//当前选中治疗结果
+          patientName: '',//病人姓名
+          sex: 0, // 病人性别
+          age: '',
+          photoNum: '', // 联系方式
+          ryDate: '', // 入院日期
+          ryDetailDate: '',
+          remarks: '', // 备注
+          preImageData: [],//术前图片文件对象
+          intraImageData: [],
+          afterImageData: [],
+          src: '',
+          isLoadingImg: false
+        }
       };
     },
+    mounted() {
+      this.getCaseData(); // 获取所有医生信息
+      this.getDiagnosisData();//获取所有诊断数据
+      this.getOperationData();// 获取所有手术方式数据
+      this.getTreatmentMethodData();// 获取所有治疗方式数据
+      this.getTreatmentOutcomeData();
+    },
     methods: {
-      // 处理上传
-      handleUploadChange: function() {
-
+      // 获取所有医生信息
+      getCaseData() {
+        const self = this;
+        self.$http.get('/doctor/all').then((res) => {
+          if(res.status === 200) {
+            const data = res.data;
+            data.forEach((item) => {
+              self.caseData.push(item.doctorName);
+            });
+            self.allCaseData = data;
+          }
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
       },
-      // 选择住院医师
-      handleCaseChange: function() {
-
+      // 获取所有诊断数据
+      getDiagnosisData() {
+        const self = this;
+        this.$http.get('/dictionary/DIAGNOSIS_TYPE').then((res) => {
+          if(res.status === 200) {
+            const data = res.data;
+            self.allZdData = [];
+            data.forEach((item) => {
+              self.allZdData.push(item.value);
+            });
+          }
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
       },
-      // 诊断部位选择
-      handleZdbwChange: function(selectedItems) {
-        this.zdbwText = selectedItems;
+      //获取所有手术方式数据
+      getOperationData() {
+        const self = this;
+        this.$http.get('/dictionary/OPERATION_NAME_TYPE').then((res) => {
+          if(res.status === 200) {
+            const data = res.data;
+            self.allSsfsData = [];
+            data.forEach((item) => {
+              self.allSsfsData.push(item.value);
+            });
+          }
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
       },
-      // 入院日期 
-      onDateChange: function() {
-
+      // 获取所有治疗方式数据
+      getTreatmentMethodData() {
+        const self = this;
+        this.$http.get('/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
+          if(res.status === 200) {
+            const data = res.data;
+            self.allZlfsData = [];
+            data.forEach((item) => {
+              self.allZlfsData.push(item.value);
+            });
+          }
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
+      },
+      //获取所有治疗结果数据
+      getTreatmentOutcomeData() {
+        const self = this;
+        this.$http.get('/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
+          if(res.status === 200) {
+            const data = res.data;
+            self.allZljgData = [];
+            data.forEach((item) => {
+              self.allZljgData.push(item.value);
+            });
+          }
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
+      },
+      // 查找区域数据处理
+      // 主治医师
+      handleSearchCaseChange(index) {
+        // self.searchObj.currentCaseId = self.allCaseData[index].doctorId;
+        // self.searchObj.currentCaseName = [];
+        // self.searchObj.currentCaseName.push(self.allCaseData[index].doctorName);
+        const self = this;
+        self.allCaseData.forEach((item) => {
+          if(item.doctorName === index) {
+            self.searchObj.currentCaseId.push(item.doctorId);
+          }
+        })
+        self.searchObj.currentCaseName = [];
+        // self.currentCaseName.push(self.allCaseData[index].doctorName);
+        self.searchObj.currentCaseName.push(index);
+      },
+      // 诊断部位
+      handleSearchZdbwChange(selectedItems) {
+        this.searchObj.zdData = selectedItems;
+      },
+      // 手术方式
+      handleSearchSsfsChange(item) {
+        this.searchObj.ssfsData = item;
+      },
+      // 治疗方式
+      handleSearchZlfsChange(item) {
+        this.searchObj.zlfsData = item;
+      },
+      // 治疗结果
+      handleSearchZljgChange(item) {
+        this.searchObj.zljgData = item;
+      },
+      // 入院日期
+      onSearchDateChange(item, datestring) {
+        this.searchObj.ryStartDate = item;
+        this.searchObj.ryStartDetailDate = datestring;
+      },
+      onSearchEndDateChange(item, datestring) {
+        this.searchObj.ryEndDate = item;
+        this.searchObj.ryEndDetailDate = datestring;
       },
       // 点击查找
-      handleSearch: function() {
-        
+      handleSearch() {
+        const self = this;
+        const searchParams = {
+          "caseNo": self.searchObj.hospitalNum,
+          "diagnosis": self.searchObj.zdData.join(),
+          "doctorIds": self.searchObj.currentCaseId,
+          "endAdmissionDate": self.searchObj.ryEndDetailDate,
+          "maxPatientAge": self.searchObj.endage,
+          "minPatientAge": self.searchObj.startage,
+          "operationName": self.searchObj.ssfsData.join(),
+          "patientGender": self.searchObj.sex == 0 ? '男' : '女',
+          "patientName": self.searchObj.patientName,
+          "phoneNumber": "",
+          "startAdmissionDate": self.searchObj.ryStartDetailDate,
+          "treatmentMethod": self.searchObj.zlfsData.join(),
+          "treatmentOutcome": self.searchObj.zljgData.join()
+        };
+        self.$http.post('/patientcase', searchParams)
+        .then((res) => {
+          const data = res.data.list;
+          data.forEach((item, index) => {
+            item.key = index;
+            item.doctor = item.doctor.doctorName;
+            let diagnosisdata = [];
+            item.diagnosis.forEach((list) => {
+              diagnosisdata.push(list.dictionaryValue);
+            });
+            item.diagnosis = diagnosisdata.join();
+
+            let operationNamedata = [];
+            item.operationName.forEach((list) => {
+              operationNamedata.push(list.dictionaryValue);
+            });
+            item.operationName = operationNamedata.join();
+
+            let treatmentMethodData = [];
+            item.treatmentMethod.forEach((list) => {
+              treatmentMethodData.push(list.dictionaryValue);
+            });
+            item.treatmentMethod = treatmentMethodData.join();
+
+
+            let treatmentOutcomeData = [];
+            item.treatmentOutcome.forEach((list) => {
+              treatmentOutcomeData.push(list.dictionaryValue);
+            });
+            item.treatmentOutcome = treatmentOutcomeData.join();
+
+            item.opts = [{
+              text: '查看',
+              type: 'get'
+            },{
+              text: '编辑',
+              type: 'edit'
+            },{
+              text: '删除',
+              type: 'del'
+            },]
+
+          });
+          console.log(data);
+          self.tableData = data;
+          
+        }).catch((err) => {
+          console.log(err);
+        });
+      },
+      // 编辑区域
+      // 主治医师
+      handleEditCaseChange(index) {
+        const self = this;
+        self.editObj.currentCaseId = self.allCaseData[index].doctorId;
+        self.editObj.currentCaseName = [];
+        self.editObj.currentCaseName.push(self.allCaseData[index].doctorName);
+      },
+      // 诊断部位
+      handleEditZdbwChange(selectedItems) {
+        this.editObj.zdData = selectedItems;
+      },
+      //手术方式
+      handleEditSsfsChange(item) {
+        this.editObj.ssfsData = item;
+      },
+      // 治疗方式
+      handleEditZlfsChange(item) {
+        this.editObj.zlfsData = item;
+      },
+      // 治疗结果
+      handleEditZljgChange(item) {
+        this.editObj.zljgData = item;
+      },
+      onEditDateChange(item, datestring) {
+        this.editObj.ryDate = item;
+        this.editObj.ryDetailDate = datestring;
       },
       // 处理操作
-      hancleOpt: function() {
-        
+      hancleOpt: function(key, type) {
+        console.log(key, '-----', type);
+        if(type === 'get') {
+          this.checkPatientInfoVisible = true;
+          this.checkObj = this.tableData[key];
+          this.getImgList(this.tableData[key].caseNo);
+        } else if(type === 'del') {
+          this.delModalVisible = true;
+        } else {
+          this.editModalVisible = true;
+          const data = this.tableData[key];
+          this.editObj.hospitalNum = data.caseNo;
+          this.editObj.currentCaseName = [];
+          this.editObj.currentCaseName.push(data.doctor);
+          this.editObj.zdData = [];
+          this.editObj.zdData = data.diagnosis.split(',');
+          this.editObj.ssfsData = [];
+          this.editObj.ssfsData = data.operationName.split(',');
+          this.editObj.zlfsData = [];
+          this.editObj.zlfsData = data.treatmentMethod.split(',');
+          this.editObj.zljgData = [];
+          this.editObj.zljgData = data.treatmentMethod.split(',');
+          this.editObj.patientName = data.patientName;
+          this.editObj.sex = data.patientGender === '男' ? 0 : 1;
+          this.editObj.age = data.patientAge;
+          this.editObj.photoNum = data.phoneNumber;
+          this.editObj.ryDate = moment(data.admissionDate, 'YYYY-MM-DD');
+          console.log(this.editObj);
+          this.getImgList(data.caseNo);
+        }
+      },
+      // 获取照片
+      getImgList(caseNo) {
+        const self = this;
+        self.checkPreImageData = [];
+        self.checkIntraImageData = [];
+        self.checkAfterImageData = [];
+        self.editObj.preImageData = [];
+        self.editObj.intraImageData = [];
+        self.editObj.afterImageData = [];
+        self.$http.get('/image/' + caseNo)
+        .then((res) => {
+          debugger;
+          const data = res.data;
+          data.preOperativeImageList.forEach((item) => {
+            const obj = {
+              src: 'data:image/png;base64,' + item.image,
+              type: item.imageType,
+              id: item.imageUid
+            };
+            self.checkPreImageData.push(obj);
+            self.editObj.preImageData.push(obj);
+          });
+          data.intraOperativeImageList.forEach((item) => {
+            const obj = {
+              src: 'data:image/png;base64,' + item.image,
+              type: item.imageType,
+              id: item.imageUid
+            };
+            self.checkIntraImageData.push(obj);
+            self.editObj.intraImageData.push(obj);
+          });
+          data.postOperativeImageList.forEach((item) => {
+            const obj = {
+              src: 'data:image/png;base64,' + item.image,
+              type: item.imageType,
+              id: item.imageUid
+            };
+            self.checkAfterImageData.push(obj);
+            self.editObj.afterImageData.push(obj);
+          });
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
+      },
+      //术前照片上传
+      beforeImgUpload(file) {
+        const self = this;
+        self.editObj.isLoadingImg = true;
+        const formData = new FormData();
+        formData.append('image', file.file);
+        formData.append('type', 'PRE_OPERATIVE_IMAGE_TYPE');
+        formData.append('caseNo', self.editObj.hospitalNum);
+        self.$http.post('/image', formData)
+        .then((res) => {
+          const data = res.data;
+          self.src = 'data:image/png;base64,' + data.image;
+          const obj = {
+            src: 'data:image/png;base64,' + data.image,
+            type: data.imageType,
+            id: data.imageUid
+          };
+          self.editObj.preImageData.push(obj);
+          self.editObj.isLoadingImg = false;
+        }).catch((err) => {
+          console.log(err);
+        });
+      },
+      intraImgUpload(file) {
+        const self = this;
+        self.editObj.isLoadingImg = true;
+        const formData = new FormData();
+        formData.append('image', file.file);
+        formData.append('type', 'INTRA_OPERATIVE_IMAGE_TYPE');
+        formData.append('caseNo', self.patientId);
+        self.$http.post('/image', formData)
+        .then((res) => {
+          self.editObj.isLoadingImg = false;
+          const data = res.data;
+          self.src = 'data:image/png;base64,' + data.image;
+          const obj = {
+            src: 'data:image/png;base64,' + data.image,
+            type: data.imageType,
+            id: data.imageUid
+          };
+          self.editObj.intraImageData.push(obj);
+        }).catch((err) => {
+          console.log(err);
+        });
+      },
+      afterImgUpload(file) {
+        const self = this;
+        self.editObj.isLoadingImg = true;
+        const formData = new FormData();
+        formData.append('image', file.file);
+        formData.append('type', 'POST_OPERATIVE_IMAGE_TYPE');
+        formData.append('caseNo', self.patientId);
+        self.$http.post('/image', formData)
+        .then((res) => {
+          self.editObj.isLoadingImg = false;
+          const data = res.data;
+          self.src = 'data:image/png;base64,' + data.image;
+          const obj = {
+            src: 'data:image/png;base64,' + data.image,
+            type: data.imageType,
+            id: data.imageUid
+          };
+          self.editObj.afterImageData.push(obj);
+
+        }).catch((err) => {
+          console.log(err);
+        });
+      },
+      // 查看病人信息 关闭弹窗
+      closeInfoModal: function() {
+        this.checkPatientInfoVisible = false;
+      },
+      // 删除病人信息 弹窗关闭
+      handleDelInfo: function() {
+        this.delModalVisible = false;
+      },
+      handleCloseDelModatl: function() {
+        this.delModalVisible = false;
+      },
+      // 编辑病人信息 确认按钮点击
+      handleEditInfo: function() {
+        this.editModalVisible = false;
+      },
+      handleCloseEditModal: function() {
+        this.editModalVisible = false;
       }
     },
     computed: {
@@ -230,6 +972,151 @@
   .form-box {
     .ant-row {
       margin: 0;
+    }
+  }
+  .info-table {
+    width: 100%;
+    tr {
+      height: 26px;
+      line-height: 26px;
+      td {
+        border: 1px solid #ddd;
+        width: 16%;
+        text-align: center;
+      }
+    }
+  }
+  .check-modal-photo-box {
+    margin: 0 15px;
+    position: relative;
+    .photo-item {
+      padding-left: 100px;
+      margin-top: 15px;
+      min-height: 200px;
+      overflow: hidden;
+      label {
+        width: 100px;
+        display: block;
+        margin-left: -100px;
+        text-align: center;
+        float: left;
+        position: relative;
+        top: 80px;
+        left: -10px;
+      }
+      img {
+        margin-left: 20px;
+        width: 200px;
+        height: 200px;
+      }
+      .items-list {
+        float: left;
+        width: 200px;
+        height: 200px;
+        position: relative;
+        margin-left: 15px;
+      }
+    }
+  }
+  .ant-modal-footer {
+    text-align: center !important;
+  }
+  .edit-info-box {
+    .form-box {
+      margin: 0 15px 0 15px;
+      .gutter-row {
+        .gutter-box {
+          padding-left: 100px;
+          margin-top: 15px;
+          &.sex {
+            margin-top: 20px;
+          }
+          .label {
+            display: inline-block;
+            margin-left: -100px;
+            padding-right: 15px;
+            width: 100px;
+            text-align: center;
+            &.remarks {
+              position: absolute;
+              top: 23px;
+            }
+          }
+        }
+      }
+    }
+    .photo-box {
+      margin: 0 15px;
+      position: relative;
+      .mask {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-color: rgba(0,0,0,.3);
+        text-align: center;
+        z-index: 9999;
+        .spin-icon {
+          top: 45%;
+          position: relative;
+        }
+        .upload-explain {
+          margin-top: 200px;
+          color: #ddd;
+          font-size: 20px;
+        }
+      }
+      .photo-item {
+        padding-left: 100px;
+        margin-top: 15px;
+        min-height: 200px;
+        overflow: hidden;
+        label {
+          width: 100px;
+          display: block;
+          margin-left: -100px;
+          text-align: center;
+          float: left;
+          position: relative;
+          top: 80px;
+          left: -10px;
+        }
+        img {
+          margin-left: 20px;
+          width: 200px;
+          height: 200px;
+        }
+        .upload-img-btn {
+          float: left;
+          width: 102px;
+          height: 102px;
+        }
+        .items-list {
+          float: left;
+          width: 200px;
+          height: 200px;
+          position: relative;
+          margin-left: 15px;
+          cursor: pointer;
+          &:hover {
+            .del-btn {
+              display: block;
+            }
+          }
+          .del-btn {
+            position: absolute;
+            top: 10px;
+            right: 0;
+            display: none;
+            width: 20px !important;
+            .anticon{
+              position: relative;
+              left: -7px;
+            }
+          }
+        }
+      }
     }
   }
 </style>
