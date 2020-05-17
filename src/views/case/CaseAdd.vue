@@ -15,25 +15,24 @@
           <div class="gutter-box sex">
             <label class="label">性别</label>
             <a-radio-group v-model="sex">
-              <a-radio :value="1">男</a-radio>
-              <a-radio :value="2">女</a-radio>
+              <a-radio :value="0">男</a-radio>
+              <a-radio :value="1">女</a-radio>
             </a-radio-group>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
             <div class="gutter-box">
               <label class="label">职称</label>
-              <a-select :defaultValue="currentCaseName" style="width:100%;" @change="handleCaseChange">
-                <a-select-option v-for="(item, index) in caseData" :key="index"
-                  >{{item}}</a-select-option
-                >
-              </a-select>
+              <a-select style="width:100%;" @change="handleCaseChange" :value="currentCaseType" placeholder="请选择职称">
+              <a-select-option v-for="(item, index) in allCaseData" :key="index" :value="item"
+                >{{item}}</a-select-option
+              >
+            </a-select>
             </div>
           </a-col>
         <a-col class="gutter-row" :span="24">
           <div class="gutter-box">
             <label class="label remarks">备注</label>
-            
             <a-textarea
               v-model="remarks"
               placeholder="请添加备注"
@@ -45,44 +44,76 @@
     </div>
     <div class="btn-list">
       <a-button type="primary" @click="handleUpload">确定</a-button>
+      <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
     </div>
   </div>
 </template>
 <script>
-  const caseData = ['张医生','王医生','李医生'];
-  const zdbwData = ['头部','脸部','腿部','胳膊']
   export default {
     data() {
       return {
-        caseData: caseData,//所有医生信息
-        currentCaseName: caseData[0], // 默认医生信息
-        caseName: '',//病人姓名
-        sex: 1,
+        allCaseData: [],//所有职称信息
+        currentCaseType: [], // 职称信息
+        caseName: '',//医生姓名
+        sex: 0,
         remarks: '' // 备注
       };
     },
+    mounted() {
+      this.getCaseData();
+    },
     methods: {
-      // 处理上传
-      handleUploadChange: function() {
-
+      //获取职称信息
+      getCaseData() {
+        const self = this;
+        self.$http.get('/dictionary/TITLE_TYPE').then((res) => {
+          if(res.status === 200) {
+            const data = res.data;
+            data.forEach((item) => {
+              self.allCaseData.push(item.value);
+            });
+          }
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
       },
       // 选择住院医师
-      handleCaseChange: function() {
-
-      },
-      // 诊断部位选择
-      handleZdbwChange: function(selectedItems) {
-        this.zdbwText = selectedItems;
-      },
-      // 入院日期 
-      onDateChange: function() {
-
+      handleCaseChange(item) {
+        this.currentCaseType = [];
+        this.currentCaseType.push(item);
       },
       // 点击确定
-      handleUpload: function() {
-        
+      handleUpload() {
+        const self = this;
+        const params = {
+          doctorGender: self.sex == 0 ? '男' : '女',
+          doctorName: self.caseName,
+          titleType: self.currentCaseType[0]
+        }
+        if (self.caseName === '') {
+          self.$message.error('请输入医生姓名');
+          return false;
+        }
+        if (self.currentCaseType.length === 0) {
+          self.$message.error('请选择医生职称');
+          return false;
+        }
+        console.log(params);
+        self.$http.post('/doctor/addition', params)
+        .then((res) => {
+          self.$message.success('添加成功');
+          self.resetForm();
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
+      },
+      resetForm() {
+        this.currentCaseType = [];
+        this.caseName = '';
+        this.remarks = '';
+        this.sex = 0;
       }
-    },
+    }
   };
 </script>
 <style lang="scss">
@@ -145,7 +176,7 @@
     }
   }
   .btn-list {
-    margin-left: 140px;
+    margin-left: 115px;
     .ant-btn-primary {
       margin-top: 15px;
       width: 100px !important;

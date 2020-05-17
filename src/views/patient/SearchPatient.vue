@@ -143,7 +143,7 @@
     <div class="table-btns">
       <a-button type="primary" @click="handleSearch">删除</a-button>
       <a-button type="primary" @click="handleSearch">导出</a-button>
-      <a-button type="primary" @click="handleSearch">打印</a-button>
+      <!-- <a-button type="primary" @click="handleSearch">打印</a-button> -->
     </div>
     <div class="table-box">
       <a-table 
@@ -156,7 +156,7 @@
         :scroll="{ x: 1600 }"
       >
       <div slot="opts" slot-scope="opts, record" class="opt-btns">
-        <a-button type="primary" v-for="item in opts" :key="item.text" size="small" @click="hancleOpt(record.key, item.type)">{{item.text}}</a-button>
+        <a-button type="primary" style="cursor:pointer;" v-for="item in opts" :key="item.text" size="small" @click="hancleOpt(record.key, item.type)">{{item.text}}</a-button>
       </div>
       </a-table>
     </div>
@@ -196,6 +196,10 @@
         </tr>
       </table>
       <div class="check-modal-photo-box">
+        <div class="mask" v-show="isLoadingImg">
+          <a-spin tip="图片加载中请稍等..." size="large" class="spin-icon">
+          </a-spin>
+        </div>
         <div class="photo-item">
           <label>术前</label>
           <div class="items-list" v-for="(item) in checkPreImageData" :key="item.id">
@@ -367,6 +371,10 @@
             <a-spin tip="图片上传中请稍等..." size="large" class="spin-icon">
             </a-spin>
           </div>
+          <div class="mask" v-show="isLoadingImg">
+            <a-spin tip="图片加载中请稍等..." size="large" class="spin-icon">
+            </a-spin>
+          </div>
           <div class="photo-item">
             <label>术前</label>
             <div class="upload-img-btn">
@@ -511,6 +519,8 @@
   export default {
     data() {
       return {
+        tableCurrentIndex: 0,
+        isLoadingImg: false,
         allCaseData: [],//医生信息
         caseData: [],
         allZdData: [],//诊断部位数据
@@ -733,8 +743,6 @@
               treatmentMethodData.push(list.dictionaryValue);
             });
             item.treatmentMethod = treatmentMethodData.join();
-
-
             let treatmentOutcomeData = [];
             item.treatmentOutcome.forEach((list) => {
               treatmentOutcomeData.push(list.dictionaryValue);
@@ -790,34 +798,41 @@
       },
       // 处理操作
       hancleOpt: function(key, type) {
-        console.log(key, '-----', type);
+        const self = this;
         if(type === 'get') {
-          this.checkPatientInfoVisible = true;
-          this.checkObj = this.tableData[key];
-          this.getImgList(this.tableData[key].caseNo);
+          self.checkPatientInfoVisible = true;
+          self.checkObj = self.tableData[key];
+          self.getImgList(self.tableData[key].caseNo);
         } else if(type === 'del') {
-          this.delModalVisible = true;
+          self.delModalVisible = true;
         } else {
-          this.editModalVisible = true;
-          const data = this.tableData[key];
-          this.editObj.hospitalNum = data.caseNo;
-          this.editObj.currentCaseName = [];
-          this.editObj.currentCaseName.push(data.doctor);
-          this.editObj.zdData = [];
-          this.editObj.zdData = data.diagnosis.split(',');
-          this.editObj.ssfsData = [];
-          this.editObj.ssfsData = data.operationName.split(',');
-          this.editObj.zlfsData = [];
-          this.editObj.zlfsData = data.treatmentMethod.split(',');
-          this.editObj.zljgData = [];
-          this.editObj.zljgData = data.treatmentMethod.split(',');
-          this.editObj.patientName = data.patientName;
-          this.editObj.sex = data.patientGender === '男' ? 0 : 1;
-          this.editObj.age = data.patientAge;
-          this.editObj.photoNum = data.phoneNumber;
-          this.editObj.ryDate = moment(data.admissionDate, 'YYYY-MM-DD');
-          console.log(this.editObj);
-          this.getImgList(data.caseNo);
+          self.editModalVisible = true;
+          self.tableCurrentIndex = key;
+          const data = self.tableData[key];
+          self.editObj.hospitalNum = data.caseNo;
+          self.editObj.currentCaseName = [];
+          self.editObj.currentCaseName.push(data.doctor);
+          self.editObj.zdData = [];
+          self.editObj.zdData = data.diagnosis.split(',');
+          self.editObj.ssfsData = [];
+          self.editObj.ssfsData = data.operationName.split(',');
+          self.editObj.zlfsData = [];
+          self.editObj.zlfsData = data.treatmentMethod.split(',');
+          self.editObj.zljgData = [];
+          self.editObj.zljgData = data.treatmentOutcome.split(',');
+          self.editObj.patientName = data.patientName;
+          self.editObj.sex = data.patientGender === '男' ? 0 : 1;
+          self.editObj.age = data.patientAge;
+          self.editObj.photoNum = data.phoneNumber;
+          self.editObj.ryDate = moment(data.admissionDate, 'YYYY-MM-DD');
+          self.editObj.ryDetailDate = data.admissionDate;
+          self.allCaseData.forEach((item) => {
+            if(item.doctorName === data.doctor) {
+              self.editObj.currentCaseId = item.doctorId;
+            }
+          })
+          console.log(self.editObj);
+          self.getImgList(data.caseNo);
         }
       },
       // 获取照片
@@ -829,9 +844,9 @@
         self.editObj.preImageData = [];
         self.editObj.intraImageData = [];
         self.editObj.afterImageData = [];
+        self.isLoadingImg = true;
         self.$http.get('/image/' + caseNo)
         .then((res) => {
-          debugger;
           const data = res.data;
           data.preOperativeImageList.forEach((item) => {
             const obj = {
@@ -860,6 +875,7 @@
             self.checkAfterImageData.push(obj);
             self.editObj.afterImageData.push(obj);
           });
+          self.isLoadingImg = false;
         }).catch(() => {
           self.$message.error('请求失败');
         });
@@ -932,6 +948,29 @@
           console.log(err);
         });
       },
+      //删除图片
+      handleDeleteImg(uuid, type, index) {
+        const self = this;
+        let arr = [];
+        arr[0] = uuid;
+        const params = {
+          uuids: arr
+        }
+        self.$http.post('/image/multipleDelete', params)
+        .then(() => {
+          if(type === "intraOperative") {
+            self.editObj.intraImageData.splice(index, 1);
+          } else if(type === "preOperative") {
+            self.editObj.preImageData.splice(index, 1);
+          } else if(type === "postOperative") {
+            self.editObj.afterImageData.splice(index, 1);
+          }
+          self.$message.success('删除成功');
+        }).catch((err) => {
+          console.log(err);
+          self.$message.error('删除失败');
+        });
+      },
       // 查看病人信息 关闭弹窗
       closeInfoModal: function() {
         this.checkPatientInfoVisible = false;
@@ -945,6 +984,43 @@
       },
       // 编辑病人信息 确认按钮点击
       handleEditInfo: function() {
+        const self = this;
+        // 上传信息
+        const params = {
+          "admissionDate": self.editObj.ryDetailDate,
+          "attendingDoctorId": self.editObj.currentCaseId,
+          "caseNo": self.editObj.hospitalNum,
+          "diagnosis": self.editObj.zdData,
+          "operationName": self.editObj.ssfsData,
+          "patientAge": self.editObj.age,
+          "patientGender": self.editObj.sex == 0 ? '男' : '女',
+          "patientName": self.editObj.patientName,
+          "phoneNumber": self.editObj.photoNum,
+          "treatmentMethod": self.editObj.zlfsData,
+          "treatmentOutcome": self.editObj.zljgData
+        };
+        self.$http.post('/patientcase/addition', params)
+        .then(() => {
+          self.$message.success('编辑成功');
+          window.scrollTo(0, 0);
+          self.getDiagnosisData();//获取所有诊断数据
+          self.getOperationData();// 获取所有手术方式数据
+          self.getTreatmentMethodData();// 获取所有治疗方式数据
+          self.getTreatmentOutcomeData();
+          let tableObj = self.tableData[self.tableCurrentIndex];
+          tableObj.admissionDate = self.editObj.ryDetailDate;
+          tableObj.patientName = self.editObj.patientName;
+          tableObj.patientAge = self.editObj.age;
+          tableObj.patientGender = self.editObj.sex == 0 ? '男' : '女';
+          tableObj.doctor = self.editObj.currentCaseName;
+          tableObj.phoneNumber = self.editObj.photoNum;
+          tableObj.diagnosis = self.editObj.zdData.join(',');
+          tableObj.operationName = self.editObj.ssfsData.join(',');
+          tableObj.treatmentMethod = self.editObj.zlfsData.join(',');
+          tableObj.treatmentOutcome = self.editObj.zljgData.join(',');
+        }).catch((err) => {
+          console.log(err);
+        });
         this.editModalVisible = false;
       },
       handleCloseEditModal: function() {
@@ -1015,6 +1091,25 @@
         height: 200px;
         position: relative;
         margin-left: 15px;
+      }
+    }
+    .mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-color: rgba(0,0,0,.3);
+      text-align: center;
+      z-index: 9999;
+      .spin-icon {
+        top: 45%;
+        position: relative;
+      }
+      .upload-explain {
+        margin-top: 200px;
+        color: #ddd;
+        font-size: 20px;
       }
     }
   }

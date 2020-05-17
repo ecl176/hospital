@@ -5,6 +5,7 @@ import AddPatient from '../views/patient/AddPatient.vue'
 import SearchPatient from '../views/patient/SearchPatient.vue'
 import AddCase from '../views/case/CaseAdd.vue'
 import SearchCase from '../views/case/SearchCase.vue'
+import DictionaryManage from '../views/dictionary/DictionaryManage.vue'
 
 Vue.use(VueRouter)
 
@@ -33,6 +34,11 @@ const routes = [
     path: '/searchcase',
     name: 'searchcase',
     component: SearchCase
+  },
+  {
+    path: '/dictionary',
+    name: 'dictionary',
+    component: DictionaryManage
   }
 ]
 
