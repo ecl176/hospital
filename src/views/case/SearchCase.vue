@@ -15,16 +15,16 @@
           <div class="gutter-box sex">
             <label class="label">性别</label>
             <a-radio-group v-model="sex">
-              <a-radio :value="1">男</a-radio>
-              <a-radio :value="2">女</a-radio>
+              <a-radio :value="0">男</a-radio>
+              <a-radio :value="1">女</a-radio>
             </a-radio-group>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">职称</label>
-            <a-select :defaultValue="currentCaseName" style="width:100%;" @change="handleCaseChange">
-              <a-select-option v-for="(item, index) in caseData" :key="index"
+            <a-select style="width:100%;" @change="handleCaseChange" :value="currentCaseName" placeholder="请选择职称">
+                <a-select-option v-for="(item, index) in allCaseData" :key="index" :value="item"
                 >{{item}}</a-select-option
               >
             </a-select>
@@ -33,7 +33,7 @@
       </a-row>
     </div>
     <div class="btn-list">
-      <a-button type="primary" @click="handleUpload">查询</a-button>
+      <a-button type="primary" @click="handleSearch">查询</a-button>
     </div>
     <div class="table-btns">
       <a-button type="primary" @click="handleSearch">删除</a-button>
@@ -47,12 +47,14 @@
         size="middle"
         :rowSelection="rowSelection"
       >
+        <div slot="opts" slot-scope="opts, record" class="opt-btns">
+          <a-button type="primary" style="cursor:pointer;" v-for="item in opts" :key="item.text" size="small" @click="hancleOpt(record.key, item.type)">{{item.text}}</a-button>
+        </div>
       </a-table>
     </div>
   </div>
 </template>
 <script>
-  const caseData = ['张医生','王医生','李医生'];
   const columns = [
     {
       title: '姓名',
@@ -60,73 +62,109 @@
       align: 'center'
     },
     {
-      title: '入院日期',
-      dataIndex: 'date',
+      title: '性别',
+      dataIndex: 'sex',
       align: 'center'
     },
     {
-      title: '联系电话',
-      dataIndex: 'phone',
+      title: '职称',
+      dataIndex: 'type',
       align: 'center'
     },
     {
-      title: '主治医生',
-      dataIndex: 'case',
-      align: 'center'
-    },
-    {
-      title: '诊断部位',
-      dataIndex: 'zdbw',
-      align: 'center'
-    },
-    {
-      title: '诊断结果',
-      dataIndex: 'zdjg',
-      align: 'center'
-    },
+      title: '操作',
+      dataIndex: 'opts',
+      align: 'center',
+      scopedSlots: { customRender: 'opts' },
+      width: 200,
+      fixed: 'right',
+    }
   ];
   const tableData = [
     {
       key: '1',
       name: '李丽丽',
-      date: '2020-03-03',
-      phone: '18309876789',
-      case: '李丽丽',
-      zdbw: '头部',
-      zdjg: '暂无'
+      sex: '男',
+      type: '主治医师',
+      opts: [{
+        text: '查看',
+        type: 'get'
+      },{
+        text: '编辑',
+        type: 'edit'
+      },{
+        text: '删除',
+        type: 'del'
+      },]
     }
   ];
   export default {
     data() {
       return {
-        caseData: caseData,//所有医生信息
-        currentCaseName: caseData[0], // 默认医生信息
+        allCaseData: [],//所有医生信息
+        currentCaseName: [], // 默认医生信息
         caseName: '',//病人姓名
-        sex: 1,
+        sex: 0,
         columns: columns, // 表格头
-        tableData: tableData, // 表格数据
+        tableData: [], // 表格数据
       };
     },
+    mounted() {
+      this.getCaseData();
+    },
     methods: {
-      // 处理上传
-      handleUploadChange: function() {
-
+      //获取职称信息
+      getCaseData() {
+        const self = this;
+        self.$http.get('/dictionary/TITLE_TYPE').then((res) => {
+          if(res.status === 200) {
+            const data = res.data;
+            data.forEach((item) => {
+              self.allCaseData.push(item.value);
+            });
+          }
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
       },
       // 选择住院医师
-      handleCaseChange: function() {
-
-      },
-      // 诊断部位选择
-      handleZdbwChange: function(selectedItems) {
-        this.zdbwText = selectedItems;
-      },
-      // 入院日期 
-      onDateChange: function() {
-
+      handleCaseChange(item) {
+        this.currentCaseName = [];
+        this.currentCaseName.push(item);
       },
       // 点击确定
-      handleUpload: function() {
-        
+      handleSearch: function() {
+        const self = this;
+        const params = {
+          doctorGender: self.sex == 0 ? '男' : '女',
+          doctorName: self.caseName,
+          titleType: self.currentCaseName[0]
+        };
+        self.$http.post('/doctor', params)
+        .then((res) => {
+          debugger;
+          const data = res.data.list;
+          let allTableData = [];
+          data.forEach((item, index) => {
+            const obj = {
+              key: index,
+              name: item.doctorName,
+              sex: '男',
+              type: item.titleType,
+              opts: [{
+                text: '编辑',
+                type: 'edit'
+              },{
+                text: '删除',
+                type: 'del'
+              }]
+            };
+            allTableData.push(obj);
+          });
+          self.tableData = allTableData;
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
       }
     },
     computed: {
@@ -204,6 +242,15 @@
   }
   .table-box {
     margin: 15px;
+    .opt-btns {
+      width: 200px;
+      .ant-btn-primary {
+        margin-left: 15px;
+        &:first-child {
+          margin-left: 0;
+        }
+      }
+    }
   }
 }
 

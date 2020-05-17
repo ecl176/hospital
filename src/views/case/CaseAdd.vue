@@ -24,7 +24,7 @@
             <div class="gutter-box">
               <label class="label">职称</label>
               <a-select style="width:100%;" @change="handleCaseChange" :value="currentCaseType" placeholder="请选择职称">
-              <a-select-option v-for="(item, index) in allCaseData" :key="index" :value="item"
+                <a-select-option v-for="(item, index) in allCaseData" :key="index" :value="item"
                 >{{item}}</a-select-option
               >
             </a-select>
@@ -98,7 +98,6 @@
           self.$message.error('请选择医生职称');
           return false;
         }
-        console.log(params);
         self.$http.post('/doctor/addition', params)
         .then((res) => {
           self.$message.success('添加成功');

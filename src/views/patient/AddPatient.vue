@@ -783,7 +783,7 @@
       right: 0;
       background-color: rgba(0,0,0,.3);
       text-align: center;
-      z-index: 9999;
+      z-index: 999;
       .spin-icon {
         top: 45%;
         position: relative;

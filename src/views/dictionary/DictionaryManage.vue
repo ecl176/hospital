@@ -191,11 +191,12 @@
       handleDelItem(type, item) {
         const self = this;
         self.currentType = type;
-        const params = {
+        const params = [{
           type: type,
           value: item
-        };
-        self.$http.delete('/dictionary', params)
+        }];
+        console.log(params);
+        self.$http.post('/dictionary/multipleDelete', params)
         .then((res) => {
           debugger;
           self.$message.success('删除成功');
@@ -216,7 +217,6 @@
         }).catch((err) => {
           console.log(err);
         });
-
       },
       handleAddItem(type) {
         const self = this;
@@ -224,7 +224,7 @@
         const params = {
           type: type,
           value: self.inputValue
-        }
+        };
         self.$http.post('/dictionary/addition', params)
         .then((res) => {
           self.inputValue = '';

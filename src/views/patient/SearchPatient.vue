@@ -142,7 +142,7 @@
     </div>
     <div class="table-btns">
       <a-button type="primary" @click="handleSearch">删除</a-button>
-      <a-button type="primary" @click="handleSearch">导出</a-button>
+      <a-button type="primary" @click="handleExport">导出</a-button>
       <!-- <a-button type="primary" @click="handleSearch">打印</a-button> -->
     </div>
     <div class="table-box">
@@ -514,11 +514,13 @@
       scopedSlots: { customRender: 'opts' },
       width: 200,
       fixed: 'right',
-    },
+    }
   ];
   export default {
     data() {
       return {
+        currentCaseId: '',
+        currentIndex: 0,
         tableCurrentIndex: 0,
         isLoadingImg: false,
         allCaseData: [],//医生信息
@@ -707,18 +709,18 @@
         const self = this;
         const searchParams = {
           "caseNo": self.searchObj.hospitalNum,
-          "diagnosis": self.searchObj.zdData.join(),
+          "diagnosis": self.searchObj.zdData,
           "doctorIds": self.searchObj.currentCaseId,
           "endAdmissionDate": self.searchObj.ryEndDetailDate,
           "maxPatientAge": self.searchObj.endage,
           "minPatientAge": self.searchObj.startage,
-          "operationName": self.searchObj.ssfsData.join(),
+          "operationName": self.searchObj.ssfsData,
           "patientGender": self.searchObj.sex == 0 ? '男' : '女',
           "patientName": self.searchObj.patientName,
           "phoneNumber": "",
           "startAdmissionDate": self.searchObj.ryStartDetailDate,
-          "treatmentMethod": self.searchObj.zlfsData.join(),
-          "treatmentOutcome": self.searchObj.zljgData.join()
+          "treatmentMethod": self.searchObj.zlfsData,
+          "treatmentOutcome": self.searchObj.zljgData
         };
         self.$http.post('/patientcase', searchParams)
         .then((res) => {
@@ -761,9 +763,7 @@
             },]
 
           });
-          console.log(data);
           self.tableData = data;
-          
         }).catch((err) => {
           console.log(err);
         });
@@ -805,6 +805,8 @@
           self.getImgList(self.tableData[key].caseNo);
         } else if(type === 'del') {
           self.delModalVisible = true;
+          self.currentIndex = key;
+          self.currentCaseId = self.tableData[key].caseNo;
         } else {
           self.editModalVisible = true;
           self.tableCurrentIndex = key;
@@ -956,7 +958,7 @@
         const params = {
           uuids: arr
         }
-        self.$http.post('/image/multipleDelete', params)
+        self.$http.delete('/image/multipleDelete', params)
         .then(() => {
           if(type === "intraOperative") {
             self.editObj.intraImageData.splice(index, 1);
@@ -977,7 +979,18 @@
       },
       // 删除病人信息 弹窗关闭
       handleDelInfo: function() {
-        this.delModalVisible = false;
+        const self = this;
+        self.delModalVisible = false;
+        const params = {
+          patientCaseNo: [self.currentCaseId]
+        }
+        self.$http.post('/patientcase/multipleDelete', params)
+        .then(() => {
+          debugger;
+          self.tableData.splice(self.currentIndex, 1);
+        }).catch((err) => {
+          console.log(err);
+        });
       },
       handleCloseDelModatl: function() {
         this.delModalVisible = false;
@@ -1025,6 +1038,17 @@
       },
       handleCloseEditModal: function() {
         this.editModalVisible = false;
+      },
+      // 处理导出
+      handleExport() {
+        const self = this;
+        self.$http.post('/patientcaserecord')
+        .then((res) => {
+          debugger;
+        })
+        .catch(() => {
+          self.$message.error('导出失败');
+        });
       }
     },
     computed: {
@@ -1274,6 +1298,9 @@
       width: 200px;
       .ant-btn-primary {
         margin-left: 15px;
+        &:first-child {
+          margin-left: 0;
+        }
       }
     }
   }
