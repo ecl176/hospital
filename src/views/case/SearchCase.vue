@@ -36,7 +36,7 @@
       <a-button type="primary" @click="handleSearch">查询</a-button>
     </div>
     <div class="table-btns">
-      <a-button type="primary" @click="handleSearch">删除</a-button>
+      <a-button type="primary" @click="handleDelete">删除</a-button>
     </div>
     <div class="table-box">
       <a-table 
@@ -80,37 +80,20 @@
       fixed: 'right',
     }
   ];
-  const tableData = [
-    {
-      key: '1',
-      name: '李丽丽',
-      sex: '男',
-      type: '主治医师',
-      opts: [{
-        text: '查看',
-        type: 'get'
-      },{
-        text: '编辑',
-        type: 'edit'
-      },{
-        text: '删除',
-        type: 'del'
-      },]
-    }
-  ];
   export default {
     data() {
       return {
         allCaseData: [],//所有医生信息
         currentCaseName: [], // 默认医生信息
         caseName: '',//病人姓名
-        sex: 0,
+        sex: 3,
         columns: columns, // 表格头
         tableData: [], // 表格数据
       };
     },
     mounted() {
       this.getCaseData();
+      this.handleInitSearch();
     },
     methods: {
       //获取职称信息
@@ -135,14 +118,49 @@
       // 点击确定
       handleSearch: function() {
         const self = this;
-        const params = {
+        let params = {
           doctorGender: self.sex == 0 ? '男' : '女',
           doctorName: self.caseName,
-          titleType: self.currentCaseName[0]
+          titleType: self.currentCaseName.length > 0 ? self.currentCaseName[0] : ''
+        };
+        if(self.sex === 3) {
+          params.doctorGender = '';
+        }
+        self.$http.post('/doctor', params)
+        .then((res) => {
+          const data = res.data.list;
+          let allTableData = [];
+          data.forEach((item, index) => {
+            const obj = {
+              key: index,
+              name: item.doctorName,
+              sex: '男',
+              type: item.titleType,
+              opts: [{
+                text: '编辑',
+                type: 'edit'
+              },{
+                text: '删除',
+                type: 'del'
+              }]
+            };
+            allTableData.push(obj);
+          });
+          self.tableData = allTableData;
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
+      },
+      //
+      handleInitSearch() {
+        const self = this;
+        const params = {
+          doctorGender: '',
+          doctorName: self.caseName,
+          titleType: ''
         };
         self.$http.post('/doctor', params)
         .then((res) => {
-          debugger;
           const data = res.data.list;
           let allTableData = [];
           data.forEach((item, index) => {

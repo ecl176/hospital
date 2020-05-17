@@ -141,7 +141,7 @@
       <a-button type="primary" @click="handleSearch">查找</a-button>
     </div>
     <div class="table-btns">
-      <a-button type="primary" @click="handleSearch">删除</a-button>
+      <a-button type="primary" @click="handleMultDelete">删除</a-button>
       <a-button type="primary" @click="handleExport">导出</a-button>
       <!-- <a-button type="primary" @click="handleSearch">打印</a-button> -->
     </div>
@@ -159,6 +159,18 @@
         <a-button type="primary" style="cursor:pointer;" v-for="item in opts" :key="item.text" size="small" @click="hancleOpt(record.key, item.type)">{{item.text}}</a-button>
       </div>
       </a-table>
+    </div>
+    <div class="page-box" v-show="pager.total > pager.pageSize">
+      <span>总共{{pager.total}}条数据</span>
+      <div class="page-label">
+        <a-pagination
+          show-size-changer
+          v-model="pager.pageNo"
+          :page-size.sync="pager.pageSize"
+          :total="pager.total"
+          @showSizeChange="onShowSizeChange"
+        />
+      </div>
     </div>
     <a-modal
       title="查看病人信息"
@@ -227,6 +239,14 @@
       @cancel="handleCloseDelModatl"
       >
       <p style="text-align:center;font-size:16px;margin: 10px 0 0">确定删除当前病人信息吗</p>
+    </a-modal>
+    <a-modal
+      v-model="delMulModalVisible"
+      title=""
+      @ok="handleMulDelInfo"
+      @cancel="handleCloseDelMulModatl"
+      >
+      <p style="text-align:center;font-size:16px;margin: 10px 0 0">确定删除所选病人信息吗</p>
     </a-modal>
     <a-modal
       v-model="editModalVisible"
@@ -521,6 +541,7 @@
       return {
         currentCaseId: '',
         currentIndex: 0,
+        allCurrentCaseId: [],
         tableCurrentIndex: 0,
         isLoadingImg: false,
         allCaseData: [],//医生信息
@@ -537,6 +558,7 @@
         checkAfterImageData:[],//弹窗病人术后照片
         delModalVisible: false,
         editModalVisible: false,
+        delMulModalVisible: false,
         searchObj: {
           hospitalNum:'',
           currentCaseName:[],//主治医师
@@ -577,6 +599,11 @@
           afterImageData: [],
           src: '',
           isLoadingImg: false
+        },
+        pager: {
+          pageNo: 1,
+          pageSize: 20,
+          total: 0
         }
       };
     },
@@ -586,6 +613,7 @@
       this.getOperationData();// 获取所有手术方式数据
       this.getTreatmentMethodData();// 获取所有治疗方式数据
       this.getTreatmentOutcomeData();
+      this.handleSearch();
     },
     methods: {
       // 获取所有医生信息
@@ -958,7 +986,7 @@
         const params = {
           uuids: arr
         }
-        self.$http.delete('/image/multipleDelete', params)
+        self.$http.post('/image/multipleDelete', params)
         .then(() => {
           if(type === "intraOperative") {
             self.editObj.intraImageData.splice(index, 1);
@@ -983,13 +1011,14 @@
         self.delModalVisible = false;
         const params = {
           patientCaseNo: [self.currentCaseId]
-        }
+        };
         self.$http.post('/patientcase/multipleDelete', params)
         .then(() => {
           debugger;
           self.tableData.splice(self.currentIndex, 1);
         }).catch((err) => {
           console.log(err);
+          self.$message.error('删除失败');
         });
       },
       handleCloseDelModatl: function() {
@@ -1042,27 +1071,76 @@
       // 处理导出
       handleExport() {
         const self = this;
-        self.$http.post('/patientcaserecord')
+        const params = {
+          "caseNo": self.searchObj.hospitalNum,
+          "diagnosis": self.searchObj.zdData,
+          "doctorIds": self.searchObj.currentCaseId,
+          "endAdmissionDate": self.searchObj.ryEndDetailDate,
+          "maxPatientAge": self.searchObj.endage,
+          "minPatientAge": self.searchObj.startage,
+          "operationName": self.searchObj.ssfsData,
+          "patientGender": self.searchObj.sex == 0 ? '男' : '女',
+          "patientName": self.searchObj.patientName,
+          "phoneNumber": "",
+          "startAdmissionDate": self.searchObj.ryStartDetailDate,
+          "treatmentMethod": self.searchObj.zlfsData,
+          "treatmentOutcome": self.searchObj.zljgData
+        };
+        self.$http.post('/patientcaserecord', params)
         .then((res) => {
           debugger;
+          const data = res.data;
+          const url = window.URL.createObjectURL(new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
+          const link = document.createElement('a');
+          link.style.display = 'none';
+          link.href = url;
+          link.setAttribute('download', 'excel.xlsx');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
         })
         .catch(() => {
           self.$message.error('导出失败');
         });
+      },
+      handleMultDelete() {
+        this.delMulModalVisible = true;
+      },
+      handleMulDelInfo() {
+        const self = this;
+        self.delMulModalVisible = false;
+        const params = {
+          patientCaseNo: self.allCurrentCaseId
+        };
+        self.$http.post('/patientcase/multipleDelete', params)
+        .then(() => {
+          self.$message.success('删除成功');
+          self.handleSearch();
+        }).catch((err) => {
+          console.log(err);
+          self.$message.error('删除失败');
+        });
+      },
+      handleCloseDelMulModatl() {
+        this.delMulModalVisible = false;
+      },
+      onShowSizeChange(current, pageSize) {
+        const self = this;
+        self.pager.pageNo = current;
+        self.pageSize = pageSize;
       }
     },
     computed: {
       rowSelection() {
-        const { selectedRowKeys } = this;
+        const self = this;
         return {
           onChange: (selectedRowKeys, selectedRows) => {
             console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-          },
-          getCheckboxProps: record => ({
-            props: {
-              name: record.name,
-            },
-          }),
+            self.allCurrentCaseId = [];
+            selectedRows.forEach((item) => {
+              self.allCurrentCaseId.push(item.caseNo);
+            });
+          }
         };
       },
     },
@@ -1302,6 +1380,13 @@
           margin-left: 0;
         }
       }
+    }
+  }
+  .page-box {
+    margin-left: 15px;
+    .page-label {
+      float: right;
+      margin-right: 5px;
     }
   }
 }
