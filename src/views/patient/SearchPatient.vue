@@ -146,9 +146,9 @@
       <!-- <a-button type="primary" @click="handleSearch">打印</a-button> -->
     </div>
     <div class="table-box">
-      <a-table 
-        :columns="columns" 
-        :dataSource="tableData" 
+      <a-table
+        :columns="columns"
+        :dataSource="tableData"
         bordered
         :pagination= 'false'
         size="middle"
@@ -384,7 +384,7 @@
               </div>
             </a-col>
           </a-row>
-          
+
         </div>
         <div class="photo-box">
           <div class="mask" v-show="editObj.isLoadingImg">
@@ -470,7 +470,8 @@
   </div>
 </template>
 <script>
-  import moment from 'moment';
+import moment from 'moment';
+import { downloadFileFromResource } from '@/utils/file'
   const columns = [
     {
       title: '住院号',
@@ -577,7 +578,7 @@
           currentCaseId:[],
         },
         checkObj: {
-          
+
         },
         editObj: {
           hospitalNum: '', //住院号
@@ -1086,22 +1087,12 @@
           "treatmentMethod": self.searchObj.zlfsData,
           "treatmentOutcome": self.searchObj.zljgData
         };
-        self.$http.post('/patientcaserecord', params)
-        .then((res) => {
-          debugger;
-          const data = res.data;
-          const url = window.URL.createObjectURL(new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
-          const link = document.createElement('a');
-          link.style.display = 'none';
-          link.href = url;
-          link.setAttribute('download', 'excel.xlsx');
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        })
-        .catch(() => {
+        self.$http.post('/patientcaserecord', params, {
+          responseType: 'blob'
+        }).then(res => downloadFileFromResource(res))
+          .catch(() => {
           self.$message.error('导出失败');
-        });
+         });
       },
       handleMultDelete() {
         this.delMulModalVisible = true;

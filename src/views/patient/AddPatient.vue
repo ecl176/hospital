@@ -474,6 +474,7 @@
             self.patientName = data.patientName; //姓名
             self.sex = data.patientGender === '男' ? 0 : 1;
             self.age = data.patientAge; // 年龄
+            self.photoNum = data.phoneNumber; //手机号
             self.zdData = [];
             data.diagnosis.forEach((item) => {
               self.zdData.push(item.dictionaryValue);// 诊断
