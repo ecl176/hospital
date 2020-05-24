@@ -41,13 +41,13 @@
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">病人起始年龄</label>
-            <a-input placeholder="请输入病人年龄" v-model='searchObj.startage' />
+            <a-input placeholder="请输入病人年龄" v-model='searchObj.startage' type="number"/>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">病人终止年龄</label>
-            <a-input placeholder="请输入病人年龄" v-model='searchObj.endage'/>
+            <a-input placeholder="请输入病人年龄" v-model='searchObj.endage' type="number"/>
           </div>
         </a-col>
       </a-row>
@@ -209,7 +209,7 @@
         </tr>
         <tr>
           <td>备注</td>
-          <td colspan="5">{{checkObj.caseComment}}</td>
+          <td colspan="5" style="text-align: left; padding-left: 10px;">{{checkObj.caseComment}}</td>
         </tr>
       </table>
       <div class="check-modal-photo-box">
@@ -761,7 +761,7 @@ import { downloadFileFromResource } from '@/utils/file'
           const data = res.data.list;
           data.forEach((item, index) => {
             item.key = index;
-            item.doctor = item.doctor.doctorName;
+            item.doctor = item.doctor ? item.doctor.doctorName : '';
             let diagnosisdata = [];
             item.diagnosis.forEach((list) => {
               diagnosisdata.push(list.dictionaryValue);

@@ -56,7 +56,7 @@
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">病人年龄</label>
-            <a-input placeholder="请输入病人年龄" v-model='age'/>
+            <a-input placeholder="请输入病人年龄" v-model='age' type="number"/>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
@@ -133,7 +133,7 @@
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">联系电话</label>
-            <a-input placeholder="请输入联系电话" v-model="photoNum" />
+            <a-input placeholder="请输入联系电话" v-model="photoNum" type="number" />
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
