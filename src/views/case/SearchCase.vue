@@ -344,7 +344,34 @@
       },
       handleEditInfo() {
         const self = this;
-        self.editCaseInfoVisible = false;
+        const params = {
+          doctorGender: self.editObj.sex == 0 ? '男' : '女',
+          doctorName: self.editObj.caseName,
+          titleType: self.editObj.currentCaseName[0],
+          doctorComment: self.editObj.remark
+        }
+        debugger;
+        if (self.editObj.caseName === '') {
+          self.$message.error('请输入医生姓名');
+          return false;
+        }
+        if (self.editObj.currentCaseName.length === 0) {
+          self.$message.error('请选择医生职称');
+          return false;
+        }
+        self.$http.post('/doctor/addition', params)
+        .then(() => {
+          self.$message.success('修改成功');
+          self.editCaseInfoVisible = false;
+          self.handleSearch();
+        }).catch(() => {
+          self.$message.error('修改失败');
+        });
+      },
+      // 编辑职称
+      handleEditCaseChange(item) {
+        this.editObj.currentCaseName = [];
+        this.editObj.currentCaseName.push(item);
       }
     },
     computed: {

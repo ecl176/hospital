@@ -88,7 +88,8 @@
         const params = {
           doctorGender: self.sex == 0 ? '男' : '女',
           doctorName: self.caseName,
-          titleType: self.currentCaseType[0]
+          titleType: self.currentCaseType[0],
+          doctorComment: self.remarks
         }
         if (self.caseName === '') {
           self.$message.error('请输入医生姓名');
