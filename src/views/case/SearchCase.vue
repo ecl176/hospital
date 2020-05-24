@@ -34,9 +34,10 @@
     </div>
     <div class="btn-list">
       <a-button type="primary" @click="handleSearch">查询</a-button>
+      <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
     </div>
     <div class="table-btns">
-      <a-button type="primary" @click="handleDelete">删除</a-button>
+      <a-button type="primary" @click="handleDelete" :disabled="allCurrentCaseId.length === 0">删除</a-button>
     </div>
     <div class="table-box">
       <a-table 
@@ -48,10 +49,77 @@
         :rowSelection="rowSelection"
       >
         <div slot="opts" slot-scope="opts, record" class="opt-btns">
-          <a-button type="primary" style="cursor:pointer;" v-for="item in opts" :key="item.text" size="small" @click="hancleOpt(record.key, item.type)">{{item.text}}</a-button>
+          <a-button type="primary" style="cursor:pointer;" v-for="item in opts" :key="item.text" size="small" @click="hancleOpt(record, item.type)">{{item.text}}</a-button>
         </div>
       </a-table>
     </div>
+    <a-modal
+      v-model="delModalVisible"
+      title=""
+      @ok="handleDelInfo"
+      @cancel="handleCloseDelModatl"
+      >
+      <p style="text-align:center;font-size:16px;margin: 10px 0 0">确定删除当前医生信息吗</p>
+    </a-modal>
+    <a-modal
+      v-model="delMulModalVisible"
+      title=""
+      @ok="handleMulDelInfo"
+      @cancel="handleCloseDelMulModatl"
+      >
+      <p style="text-align:center;font-size:16px;margin: 10px 0 0">确定删除所选医生信息吗</p>
+    </a-modal>
+    <a-modal
+      title="编辑医生信息"
+      :visible="editCaseInfoVisible"
+      :width = '1000'
+      @cancel = "handleCloseEditModal"
+      @ok = "handleEditInfo"
+      :maskClosable='false'
+      style="top: 20px;"
+      >
+      <div class="edit-info-box">
+        <div class="form-box">
+          <a-row :gutter="16">
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box">
+                <label class="label">医生姓名</label>
+                <a-input placeholder="请输入医生姓名" v-model='editObj.caseName' />
+              </div>
+            </a-col>
+            <a-col class="gutter-row" :span="8">
+              <div class="gutter-box sex">
+                <label class="label">性别</label>
+                <a-radio-group v-model="editObj.sex">
+                  <a-radio :value="0">男</a-radio>
+                  <a-radio :value="1">女</a-radio>
+                </a-radio-group>
+              </div>
+            </a-col>
+            <a-col class="gutter-row" :span="8">
+                <div class="gutter-box">
+                  <label class="label">职称</label>
+                  <a-select style="width:100%;" @change="handleEditCaseChange" :value="editObj.currentCaseName" placeholder="请选择职称">
+                    <a-select-option v-for="(item, index) in allCaseData" :key="index" :value="item"
+                    >{{item}}</a-select-option
+                  >
+                </a-select>
+                </div>
+              </a-col>
+            <a-col class="gutter-row" :span="24">
+              <div class="gutter-box">
+                <label class="label remarks">备注</label>
+                <a-textarea
+                  v-model="editObj.remark"
+                  placeholder="请添加备注"
+                  :autoSize="{ minRows: 2, maxRows: 5 }"
+                />
+              </div>
+            </a-col>
+          </a-row>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -72,6 +140,11 @@
       align: 'center'
     },
     {
+      title: '备注',
+      dataIndex: 'remark',
+      align: 'center'
+    },
+    {
       title: '操作',
       dataIndex: 'opts',
       align: 'center',
@@ -89,6 +162,19 @@
         sex: 3,
         columns: columns, // 表格头
         tableData: [], // 表格数据
+        delModalVisible: false,
+        currentCaseId: [],
+        currentIndex: 0,
+        delMulModalVisible: false,
+        allCurrentCaseId: [],
+        editObj: {
+          currentCaseName: [], // 默认职称
+          caseName: '',//病人姓名
+          sex: 0,
+          remark: ''
+        },
+        tableCurrentIndex: 0,
+        editCaseInfoVisible: false,
       };
     },
     mounted() {
@@ -136,6 +222,8 @@
               name: item.doctorName,
               sex: '男',
               type: item.titleType,
+              id: item.doctorId,
+              remark: item.doctorComment ? item.doctorComment : '',
               opts: [{
                 text: '编辑',
                 type: 'edit'
@@ -169,6 +257,8 @@
               name: item.doctorName,
               sex: '男',
               type: item.titleType,
+              id: item.doctorId,
+              remark: item.doctorComment ? item.doctorComment : '',
               opts: [{
                 text: '编辑',
                 type: 'edit'
@@ -183,20 +273,91 @@
         }).catch(() => {
           self.$message.error('请求失败');
         });
+      },
+      resetForm() {
+        this.currentCaseName = [];
+        this.caseName = '';
+        this.remark = '';
+        this.sex = 0;
+      },
+      handleDelInfo() {
+        const self = this;
+        const params = {
+          doctorIds: self.currentCaseId
+        };
+        self.$http.post('/doctor/multipleDelete', params)
+        .then(() => {
+          // self.tableData.splice(self.currentIndex, 1);
+          self.handleSearch();
+          self.delModalVisible = false;
+        }).catch((err) => {
+          console.log(err);
+          self.$message.error('删除失败');
+        });
+      },
+      handleCloseDelModatl() {
+        this.delModalVisible = false;
+      },
+      // 处理操作
+      hancleOpt: function(rowData, type) {
+        const self = this;
+        if(type === 'del') {
+          self.currentCaseId = [];
+          // self.currentIndex = key;
+          self.currentCaseId.push(rowData.id.toString());
+          self.delModalVisible = true;
+        } else {
+          self.editCaseInfoVisible = true;
+          // self.tableCurrentIndex = key;
+          const data = rowData;
+          self.editObj.currentCaseName = [];
+          self.editObj.currentCaseName.push(data.type);
+          self.editObj.caseName = data.name;
+          self.editObj.sex = data.sex === '男' ? 0 : 1;
+          self.editObj.remark = data.remark ? data.remark : '';
+
+        }
+      },
+      handleMulDelInfo() {
+        const self = this;
+        self.delMulModalVisible = false;
+        const params = {
+          doctorIds: self.allCurrentCaseId
+        };
+        self.$http.post('/doctor/multipleDelete', params)
+        .then(() => {
+          // self.tableData.splice(self.currentIndex, 1);
+          self.handleSearch();
+        }).catch((err) => {
+          console.log(err);
+          self.$message.error('删除失败');
+        });
+      },
+      handleCloseDelMulModatl() {
+        this.delMulModalVisible = false;
+      },
+      handleDelete() {
+        this.delMulModalVisible = true;
+      },
+      handleCloseEditModal() {
+        this.editCaseInfoVisible = false;
+      },
+      handleEditInfo() {
+        const self = this;
+        self.editCaseInfoVisible = false;
       }
     },
     computed: {
       rowSelection() {
-        const { selectedRowKeys } = this;
+        const self = this;
         return {
           onChange: (selectedRowKeys, selectedRows) => {
             console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-          },
-          getCheckboxProps: record => ({
-            props: {
-              name: record.name,
-            },
-          }),
+            self.allCurrentCaseId = [];
+            selectedRows.forEach((item) => {
+              self.allCurrentCaseId.push(item.id.toString());
+            });
+          }
         };
       },
     },

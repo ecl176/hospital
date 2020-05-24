@@ -99,7 +99,7 @@
           return false;
         }
         self.$http.post('/doctor/addition', params)
-        .then((res) => {
+        .then(() => {
           self.$message.success('添加成功');
           self.resetForm();
         }).catch(() => {

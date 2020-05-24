@@ -139,9 +139,10 @@
     </div>
     <div class="btn-list">
       <a-button type="primary" @click="handleSearch">查找</a-button>
+      <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
     </div>
     <div class="table-btns">
-      <a-button type="primary" @click="handleMultDelete">删除</a-button>
+      <a-button type="primary" @click="handleMultDelete" :disabled="allCurrentCaseId.length === 0">删除</a-button>
       <a-button type="primary" @click="handleExport">导出</a-button>
       <!-- <a-button type="primary" @click="handleSearch">打印</a-button> -->
     </div>
@@ -156,7 +157,7 @@
         :scroll="{ x: 1600 }"
       >
       <div slot="opts" slot-scope="opts, record" class="opt-btns">
-        <a-button type="primary" style="cursor:pointer;" v-for="item in opts" :key="item.text" size="small" @click="hancleOpt(record.key, item.type)">{{item.text}}</a-button>
+        <a-button type="primary" style="cursor:pointer;" v-for="item in opts" :key="item.text" size="small" @click="hancleOpt(record, item.type)">{{item.text}}</a-button>
       </div>
       </a-table>
     </div>
@@ -205,6 +206,10 @@
           <td>{{checkObj.treatmentOutcome}}</td>
           <td>入院日期</td>
           <td>{{checkObj.admissionDate}}</td>
+        </tr>
+        <tr>
+          <td>备注</td>
+          <td colspan="5">{{checkObj.caseComment}}</td>
         </tr>
       </table>
       <div class="check-modal-photo-box">
@@ -762,7 +767,7 @@ import { downloadFileFromResource } from '@/utils/file'
               diagnosisdata.push(list.dictionaryValue);
             });
             item.diagnosis = diagnosisdata.join();
-
+            item.caseComment = item.caseComment ? item.caseComment : "";
             let operationNamedata = [];
             item.operationName.forEach((list) => {
               operationNamedata.push(list.dictionaryValue);
@@ -826,20 +831,20 @@ import { downloadFileFromResource } from '@/utils/file'
         this.editObj.ryDetailDate = datestring;
       },
       // 处理操作
-      hancleOpt: function(key, type) {
+      hancleOpt: function(rowData, type) {
         const self = this;
         if(type === 'get') {
           self.checkPatientInfoVisible = true;
-          self.checkObj = self.tableData[key];
-          self.getImgList(self.tableData[key].caseNo);
+          self.checkObj = rowData;
+          self.getImgList(rowData.caseNo);
         } else if(type === 'del') {
           self.delModalVisible = true;
-          self.currentIndex = key;
-          self.currentCaseId = self.tableData[key].caseNo;
+          // self.currentIndex = key;
+          self.currentCaseId = rowData.caseNo;
         } else {
           self.editModalVisible = true;
-          self.tableCurrentIndex = key;
-          const data = self.tableData[key];
+          // self.tableCurrentIndex = key;
+          const data = rowData;
           self.editObj.hospitalNum = data.caseNo;
           self.editObj.currentCaseName = [];
           self.editObj.currentCaseName.push(data.doctor);
@@ -1015,8 +1020,8 @@ import { downloadFileFromResource } from '@/utils/file'
         };
         self.$http.post('/patientcase/multipleDelete', params)
         .then(() => {
-          debugger;
-          self.tableData.splice(self.currentIndex, 1);
+          // self.tableData.splice(self.currentIndex, 1);
+          self.handleSearch();
         }).catch((err) => {
           console.log(err);
           self.$message.error('删除失败');
@@ -1028,6 +1033,10 @@ import { downloadFileFromResource } from '@/utils/file'
       // 编辑病人信息 确认按钮点击
       handleEditInfo: function() {
         const self = this;
+        if(self.editObj.isLoadingImg) {
+          self.$message.warning('图片加载中，请稍等');
+          return;
+        }
         // 上传信息
         const params = {
           "admissionDate": self.editObj.ryDetailDate,
@@ -1119,6 +1128,25 @@ import { downloadFileFromResource } from '@/utils/file'
         const self = this;
         self.pager.pageNo = current;
         self.pageSize = pageSize;
+      },
+      resetForm() {
+        this.searchObj = {
+          hospitalNum:'',
+          currentCaseName:[],//主治医师
+          patientName: '',// 病人姓名
+          startage:'',
+          endage: '',
+          zdData:[],//诊断部位
+          zlfsData:[],
+          zljgData:[],
+          ssfsData: [],
+          ryStartDate:'',
+          ryStartDetailDate:'',
+          ryEndDate: '',
+          ryEndDetailDate:'',
+          sex: 0,
+          currentCaseId:[],
+        }
       }
     },
     computed: {
@@ -1184,6 +1212,7 @@ import { downloadFileFromResource } from '@/utils/file'
         height: 200px;
         position: relative;
         margin-left: 15px;
+        margin-top: 10px;
       }
     }
     .mask {
@@ -1255,10 +1284,60 @@ import { downloadFileFromResource } from '@/utils/file'
           font-size: 20px;
         }
       }
+      // .photo-item {
+      //   padding-left: 100px;
+      //   margin-top: 15px;
+      //   min-height: 200px;
+      //   overflow: hidden;
+      //   label {
+      //     width: 100px;
+      //     display: block;
+      //     margin-left: -100px;
+      //     text-align: center;
+      //     float: left;
+      //     position: relative;
+      //     top: 80px;
+      //     left: -10px;
+      //   }
+      //   img {
+      //     margin-left: 20px;
+      //     width: 200px;
+      //     height: 200px;
+      //   }
+      //   .upload-img-btn {
+      //     float: left;
+      //     width: 102px;
+      //     height: 102px;
+      //   }
+      //   .items-list {
+      //     float: left;
+      //     width: 200px;
+      //     height: 200px;
+      //     position: relative;
+      //     margin-left: 15px;
+      //     cursor: pointer;
+      //     &:hover {
+      //       .del-btn {
+      //         display: block;
+      //       }
+      //     }
+      //     .del-btn {
+      //       position: absolute;
+      //       top: 10px;
+      //       right: 0;
+      //       display: none;
+      //       width: 20px !important;
+      //       .anticon{
+      //         position: relative;
+      //         left: -7px;
+      //       }
+      //     }
+      //   }
+      // }
       .photo-item {
-        padding-left: 100px;
-        margin-top: 15px;
+        padding-left: 202px;
         min-height: 200px;
+        margin-top: 15px;
         overflow: hidden;
         label {
           width: 100px;
@@ -1268,17 +1347,13 @@ import { downloadFileFromResource } from '@/utils/file'
           float: left;
           position: relative;
           top: 80px;
-          left: -10px;
-        }
-        img {
-          margin-left: 20px;
-          width: 200px;
-          height: 200px;
+          left: -110px;
         }
         .upload-img-btn {
           float: left;
           width: 102px;
           height: 102px;
+          margin-left: -102px;
         }
         .items-list {
           float: left;
@@ -1286,7 +1361,13 @@ import { downloadFileFromResource } from '@/utils/file'
           height: 200px;
           position: relative;
           margin-left: 15px;
+          margin-top: 15px;
           cursor: pointer;
+          img {
+            margin-left: 20px;
+            width: 200px;
+            height: 200px;
+          }
           &:hover {
             .del-btn {
               display: block;

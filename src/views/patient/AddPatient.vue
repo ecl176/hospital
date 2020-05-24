@@ -234,8 +234,8 @@
       </div>
     </div>
     <div class="btn-list">
-      <a-button type="primary" @click="handleUpload">确定</a-button>
-      <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
+      <a-button type="primary" @click="handleUpload" :disabled="isLoadingImg">确定</a-button>
+      <a-button type="primary" @click="resetForm" style="margin-left: 15px;" :disabled="isLoadingImg">重置</a-button>
     </div>
   </div>
 </template>
@@ -539,7 +539,8 @@
           "patientName": self.patientName,
           "phoneNumber": self.photoNum,
           "treatmentMethod": self.zlfsData,
-          "treatmentOutcome": self.zljgData
+          "treatmentOutcome": self.zljgData,
+          "caseComment": self.remarks
         };
         if(params.admissionDate === '') {
           self.$message.error('请输入入院日期');
@@ -796,9 +797,9 @@
       }
     }
     .photo-item {
-      padding-left: 100px;
-      margin-top: 15px;
+      padding-left: 202px;
       min-height: 200px;
+      margin-top: 15px;
       overflow: hidden;
       label {
         width: 100px;
@@ -808,17 +809,13 @@
         float: left;
         position: relative;
         top: 80px;
-        left: -10px;
-      }
-      img {
-        margin-left: 20px;
-        width: 200px;
-        height: 200px;
+        left: -110px;
       }
       .upload-img-btn {
         float: left;
         width: 102px;
         height: 102px;
+        margin-left: -102px;
       }
       .items-list {
         float: left;
@@ -826,7 +823,13 @@
         height: 200px;
         position: relative;
         margin-left: 15px;
+        margin-top: 15px;
         cursor: pointer;
+        img {
+          margin-left: 20px;
+          width: 200px;
+          height: 200px;
+        }
         &:hover {
           .del-btn {
             display: block;

@@ -20,11 +20,10 @@
         </a-sub-menu>
         <a-sub-menu key="sub3">
           <span slot="title"><a-icon type="appstore" /><span>数据库管理</span></span>
-          <a-menu-item key="9">导出数据</a-menu-item>
+          <a-menu-item key="exportbase">数据管理</a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="sub4">
           <span slot="title"><a-icon type="appstore" /><span>系统设置</span></span>
-          <a-menu-item key="9">修改密码</a-menu-item>
           <a-menu-item key="dictionary">字典管理</a-menu-item>
         </a-sub-menu>
       </a-menu>

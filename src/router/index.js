@@ -7,6 +7,7 @@ import AddCase from '../views/case/CaseAdd.vue'
 import SearchCase from '../views/case/SearchCase.vue'
 import DictionaryManage from '../views/dictionary/DictionaryManage.vue'
 // import EditPassword from '../views/dictionary/DictionaryManage.vue'
+import ExportBase from '../views/database/exportBase.vue'
 
 
 Vue.use(VueRouter)
@@ -42,7 +43,11 @@ const routes = [
     name: 'dictionary',
     component: DictionaryManage
   },
-
+  {
+    path: '/exportbase',
+    name: 'exportbase',
+    component: ExportBase
+  }
 ]
 
 const router = new VueRouter({
