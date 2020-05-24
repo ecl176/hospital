@@ -221,7 +221,7 @@
             const obj = {
               key: index,
               name: item.doctorName,
-              sex: '男',
+              sex: item.doctorGender,
               type: item.titleType,
               id: item.doctorId,
               remark: item.doctorComment ? item.doctorComment : '',
@@ -256,7 +256,7 @@
             const obj = {
               key: index,
               name: item.doctorName,
-              sex: '男',
+              sex: item.doctorGender,
               type: item.titleType,
               id: item.doctorId,
               remark: item.doctorComment ? item.doctorComment : '',
@@ -352,7 +352,6 @@
           doctorComment: self.editObj.remark,
           doctorId: self.editObj.id.toString()
         }
-        debugger;
         if (self.editObj.caseName === '') {
           self.$message.error('请输入医生姓名');
           return false;

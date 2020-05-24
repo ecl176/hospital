@@ -66,7 +66,7 @@
       //获取职称信息
       getCaseData() {
         const self = this;
-        self.$http.get('/swing/dictionary/TITLE_TYPE').then((res) => {
+        self.$http.get('/dictionary/TITLE_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
@@ -85,12 +85,15 @@
       // 点击确定
       handleUpload() {
         const self = this;
-        const params = {
+        let params = {
           doctorGender: self.sex == 0 ? '男' : '女',
           doctorName: self.caseName,
           titleType: self.currentCaseType[0],
           doctorComment: self.remarks,
           doctorId: null
+        }
+        if(self.sex === 3) {
+          params.sex = "";
         }
         if (self.caseName === '') {
           self.$message.error('请输入医生姓名');
@@ -112,7 +115,7 @@
         this.currentCaseType = [];
         this.caseName = '';
         this.remarks = '';
-        this.sex = 0;
+        this.sex = 3;
       }
     }
   };
