@@ -301,7 +301,7 @@
             <a-col class="gutter-row" :span="8">
               <div class="gutter-box">
                 <label class="label">病人年龄</label>
-                <a-input placeholder="请输入病人年龄" v-model='editObj.age'/>
+                <a-input placeholder="请输入病人年龄" v-model='editObj.age' type="number"/>
               </div>
             </a-col>
             <a-col class="gutter-row" :span="8">
@@ -378,7 +378,7 @@
             <a-col class="gutter-row" :span="8">
               <div class="gutter-box">
                 <label class="label">联系电话</label>
-                <a-input placeholder="请输入联系电话" v-model="editObj.photoNum" />
+                <a-input placeholder="请输入联系电话" v-model="editObj.photoNum" type="number" />
               </div>
             </a-col>
             <a-col class="gutter-row" :span="8">
@@ -389,7 +389,18 @@
               </div>
             </a-col>
           </a-row>
-
+          <a-row :span="16">
+            <a-col class="gutter-row" :span="24">
+              <div class="gutter-box">
+                <label class="label remarks">备注</label>
+                <a-textarea
+                  v-model="editObj.remarks"
+                  placeholder="请添加备注"
+                  :autoSize="{ minRows: 2, maxRows: 5 }"
+                />
+              </div>
+            </a-col>
+          </a-row>
         </div>
         <div class="photo-box">
           <div class="mask" v-show="editObj.isLoadingImg">
@@ -579,7 +590,7 @@ import { downloadFileFromResource } from '@/utils/file'
           ryStartDetailDate:'',
           ryEndDate: '',
           ryEndDetailDate:'',
-          sex: 0,
+          sex: 3,
           currentCaseId:[],
         },
         checkObj: {
@@ -741,7 +752,7 @@ import { downloadFileFromResource } from '@/utils/file'
       // 点击查找
       handleSearch() {
         const self = this;
-        const searchParams = {
+        let searchParams = {
           "caseNo": self.searchObj.hospitalNum,
           "diagnosis": self.searchObj.zdData,
           "doctorIds": self.searchObj.currentCaseId,
@@ -756,6 +767,9 @@ import { downloadFileFromResource } from '@/utils/file'
           "treatmentMethod": self.searchObj.zlfsData,
           "treatmentOutcome": self.searchObj.zljgData
         };
+        if (self.searchObj.sex === 3) {
+          searchParams.patientGender = '';
+        }
         self.$http.post('/patientcase', searchParams)
         .then((res) => {
           const data = res.data.list;
@@ -862,6 +876,7 @@ import { downloadFileFromResource } from '@/utils/file'
           self.editObj.photoNum = data.phoneNumber;
           self.editObj.ryDate = moment(data.admissionDate, 'YYYY-MM-DD');
           self.editObj.ryDetailDate = data.admissionDate;
+          self.editObj.remarks = data.caseComment ? data.caseComment : '';
           self.allCaseData.forEach((item) => {
             if(item.doctorName === data.doctor) {
               self.editObj.currentCaseId = item.doctorId;
@@ -1033,7 +1048,7 @@ import { downloadFileFromResource } from '@/utils/file'
       // 编辑病人信息 确认按钮点击
       handleEditInfo: function() {
         const self = this;
-        if(self.editObj.isLoadingImg) {
+        if(self.editObj.isLoadingImg || self.isLoadingImg) {
           self.$message.warning('图片加载中，请稍等');
           return;
         }
@@ -1049,7 +1064,8 @@ import { downloadFileFromResource } from '@/utils/file'
           "patientName": self.editObj.patientName,
           "phoneNumber": self.editObj.photoNum,
           "treatmentMethod": self.editObj.zlfsData,
-          "treatmentOutcome": self.editObj.zljgData
+          "treatmentOutcome": self.editObj.zljgData,
+          "caseComment": self.editObj.remarks
         };
         self.$http.post('/patientcase/addition', params)
         .then(() => {
@@ -1081,27 +1097,37 @@ import { downloadFileFromResource } from '@/utils/file'
       // 处理导出
       handleExport() {
         const self = this;
-        const params = {
-          "caseNo": self.searchObj.hospitalNum,
-          "diagnosis": self.searchObj.zdData,
-          "doctorIds": self.searchObj.currentCaseId,
-          "endAdmissionDate": self.searchObj.ryEndDetailDate,
-          "maxPatientAge": self.searchObj.endage,
-          "minPatientAge": self.searchObj.startage,
-          "operationName": self.searchObj.ssfsData,
-          "patientGender": self.searchObj.sex == 0 ? '男' : '女',
-          "patientName": self.searchObj.patientName,
-          "phoneNumber": "",
-          "startAdmissionDate": self.searchObj.ryStartDetailDate,
-          "treatmentMethod": self.searchObj.zlfsData,
-          "treatmentOutcome": self.searchObj.zljgData
-        };
-        self.$http.post('/patientcaserecord', params, {
-          responseType: 'blob'
-        }).then(res => downloadFileFromResource(res))
-          .catch(() => {
-          self.$message.error('导出失败');
-         });
+        if (self.allCurrentCaseId.length === 0) {
+          const params = {
+            "caseNo": self.searchObj.hospitalNum,
+            "diagnosis": self.searchObj.zdData,
+            "doctorIds": self.searchObj.currentCaseId,
+            "endAdmissionDate": self.searchObj.ryEndDetailDate,
+            "maxPatientAge": self.searchObj.endage,
+            "minPatientAge": self.searchObj.startage,
+            "operationName": self.searchObj.ssfsData,
+            "patientGender": self.searchObj.sex == 0 ? '男' : '女',
+            "patientName": self.searchObj.patientName,
+            "phoneNumber": "",
+            "startAdmissionDate": self.searchObj.ryStartDetailDate,
+            "treatmentMethod": self.searchObj.zlfsData,
+            "treatmentOutcome": self.searchObj.zljgData
+          };
+          self.$http.post('/patientcaserecord', params, {
+            responseType: 'blob'
+          }).then(res => downloadFileFromResource(res))
+            .catch(() => {
+            self.$message.error('导出失败');
+          });
+        } else {
+          const params = self.allCurrentCaseId;
+          // self.$http.post('/patientcaserecord', params, {
+          //   responseType: 'blob'
+          // }).then(res => downloadFileFromResource(res))
+          //   .catch(() => {
+          //   self.$message.error('导出失败');
+          // });
+        }
       },
       handleMultDelete() {
         this.delMulModalVisible = true;

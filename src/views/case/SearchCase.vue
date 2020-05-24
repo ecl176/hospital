@@ -171,7 +171,8 @@
           currentCaseName: [], // 默认职称
           caseName: '',//病人姓名
           sex: 0,
-          remark: ''
+          remark: '',
+          id: ''
         },
         tableCurrentIndex: 0,
         editCaseInfoVisible: false,
@@ -315,7 +316,7 @@
           self.editObj.caseName = data.name;
           self.editObj.sex = data.sex === '男' ? 0 : 1;
           self.editObj.remark = data.remark ? data.remark : '';
-
+          self.editObj.id = data.id;
         }
       },
       handleMulDelInfo() {
@@ -348,7 +349,8 @@
           doctorGender: self.editObj.sex == 0 ? '男' : '女',
           doctorName: self.editObj.caseName,
           titleType: self.editObj.currentCaseName[0],
-          doctorComment: self.editObj.remark
+          doctorComment: self.editObj.remark,
+          doctorId: self.editObj.id.toString()
         }
         debugger;
         if (self.editObj.caseName === '') {

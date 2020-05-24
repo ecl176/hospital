@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from "axios"
+import 'ant-design-vue/dist/antd.less'
 import 'ant-design-vue/dist/antd.css'
 import moment from 'moment';
 import 'moment/locale/zh-cn';
