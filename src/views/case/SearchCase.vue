@@ -279,7 +279,7 @@
         this.currentCaseName = [];
         this.caseName = '';
         this.remark = '';
-        this.sex = 0;
+        this.sex = 3;
       },
       handleDelInfo() {
         const self = this;

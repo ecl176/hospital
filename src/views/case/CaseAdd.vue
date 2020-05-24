@@ -115,7 +115,7 @@
         this.currentCaseType = [];
         this.caseName = '';
         this.remarks = '';
-        this.sex = 3;
+        this.sex = 0;
       }
     }
   };

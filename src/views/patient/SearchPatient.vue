@@ -1075,21 +1075,22 @@ import { downloadFileFromResource } from '@/utils/file'
           self.getOperationData();// 获取所有手术方式数据
           self.getTreatmentMethodData();// 获取所有治疗方式数据
           self.getTreatmentOutcomeData();
-          let tableObj = self.tableData[self.tableCurrentIndex];
-          tableObj.admissionDate = self.editObj.ryDetailDate;
-          tableObj.patientName = self.editObj.patientName;
-          tableObj.patientAge = self.editObj.age;
-          tableObj.patientGender = self.editObj.sex == 0 ? '男' : '女';
-          tableObj.doctor = self.editObj.currentCaseName;
-          tableObj.phoneNumber = self.editObj.photoNum;
-          tableObj.diagnosis = self.editObj.zdData.join(',');
-          tableObj.operationName = self.editObj.ssfsData.join(',');
-          tableObj.treatmentMethod = self.editObj.zlfsData.join(',');
-          tableObj.treatmentOutcome = self.editObj.zljgData.join(',');
+          // let tableObj = self.tableData[self.tableCurrentIndex];
+          // tableObj.admissionDate = self.editObj.ryDetailDate;
+          // tableObj.patientName = self.editObj.patientName;
+          // tableObj.patientAge = self.editObj.age;
+          // tableObj.patientGender = self.editObj.sex == 0 ? '男' : '女';
+          // tableObj.doctor = self.editObj.currentCaseName;
+          // tableObj.phoneNumber = self.editObj.photoNum;
+          // tableObj.diagnosis = self.editObj.zdData.join(',');
+          // tableObj.operationName = self.editObj.ssfsData.join(',');
+          // tableObj.treatmentMethod = self.editObj.zlfsData.join(',');
+          // tableObj.treatmentOutcome = self.editObj.zljgData.join(',');
+          self.editModalVisible = false;
+          self.handleSearch();
         }).catch((err) => {
           console.log(err);
         });
-        this.editModalVisible = false;
       },
       handleCloseEditModal: function() {
         this.editModalVisible = false;
