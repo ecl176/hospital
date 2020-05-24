@@ -2,19 +2,19 @@
   <div id="app">
     <div class='left-menu'>
       <a-menu
-        :defaultSelectedKeys="['1']"
-        :defaultOpenKeys="['sub1']"
+        :defaultSelectedKeys="defaultSelectedKeys"
+        :defaultOpenKeys="defaultOpenKey"
         mode="inline"
         @click="handleTurnPage"
       >
-        <a-sub-menu key="1">
+        <a-sub-menu key="sub1">
           <span slot="title">
           <a-icon type="mail" /><span>病人信息管理</span></span>
           <a-menu-item key="addpatient">病人信息登记</a-menu-item>
           <a-menu-item key="searchpatient">病人信息查询</a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="sub2">
-          <span slot="title"><a-icon type="appstore" /><span>医生信息管理</span></span>
+          <span slot="title"><a-icon type="calendar" /><span>医生信息管理</span></span>
           <a-menu-item key="addcase">医生信息登记</a-menu-item>
           <a-menu-item key="searchcase">医生信息查询</a-menu-item>
         </a-sub-menu>
@@ -23,7 +23,7 @@
           <a-menu-item key="exportbase">数据管理</a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="sub4">
-          <span slot="title"><a-icon type="appstore" /><span>系统设置</span></span>
+          <span slot="title"><a-icon type="setting" /><span>系统设置</span></span>
           <a-menu-item key="dictionary">字典管理</a-menu-item>
         </a-sub-menu>
       </a-menu>
@@ -33,7 +33,9 @@
       <router-view/>
     </a-locale-provider>
     </div>
+    <div class="top-mask"></div>
   </div>
+  
 </template>
 <script>
 import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN';
@@ -44,7 +46,14 @@ moment.locale('zh-cn');
     data() {
       return {
         locale: zhCN,
+        defaultOpenKey: [],
+        defaultSelectedKeys: []
       };
+    },
+    created() {
+      const name = this.$route.name.split('_');
+      this.defaultOpenKey = [name[1]];
+      this.defaultSelectedKeys = [name[0]];
     },
     methods: {
       handleTurnPage: function(value) {
@@ -91,6 +100,18 @@ moment.locale('zh-cn');
     float: left;
     width: 100%;
     height: 100%;
+  }
+  .top-mask {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    // background: chartreuse;
+    // background-image: url(./assets/img/1.png);
+    pointer-events: none;
+    z-index: 99999;
+    // opacity: .7;
   }
 }
 

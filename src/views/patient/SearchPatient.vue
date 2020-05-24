@@ -144,7 +144,7 @@
     <div class="table-btns">
       <a-button type="primary" @click="handleMultDelete" :disabled="allCurrentCaseId.length === 0">删除</a-button>
       <a-button type="primary" @click="handleExport">导出</a-button>
-      <!-- <a-button type="primary" @click="handleSearch">打印</a-button> -->
+      <a-button type="primary" v-print="printObj" @click="handlePrint">打印</a-button>
     </div>
     <div class="table-box">
       <a-table
@@ -161,7 +161,7 @@
       </div>
       </a-table>
     </div>
-    <div class="page-box" v-show="pager.total > pager.pageSize">
+    <!-- <div class="page-box" v-show="pager.total > pager.pageSize">
       <span>总共{{pager.total}}条数据</span>
       <div class="page-label">
         <a-pagination
@@ -172,6 +172,37 @@
           @showSizeChange="onShowSizeChange"
         />
       </div>
+    </div> -->
+    <div id="printMe" v-show="printIsShow">
+      <table border="1">
+        <tr>
+          <th>住院号</th>
+          <th>入院日期</th>
+          <th>病人姓名</th>
+          <th>病人年龄</th>
+          <th>病人性别</th>
+          <th>联系电话</th>
+          <th>主治医生</th>
+          <th>诊断部位</th>
+          <th>手术方式</th>
+          <th>治疗方式</th>
+          <th>治疗结果</th>
+        </tr>
+        <tr v-for="(item,index) in tableData" :key="index">
+          <td>{{item.caseNo}}</td>
+          <td>{{item.admissionDate}}</td>
+          <td>{{item.patientName}}</td>
+          <td>{{item.patientAge}}</td>
+          <td>{{item.patientGender}}</td>
+          <td>{{item.phoneNumber}}</td>
+          <td>{{item.doctor}}</td>
+          <td>{{item.diagnosis}}</td>
+          <td>{{item.operationName}}</td>
+          <td>{{item.treatmentMethod}}</td>
+          <td>{{item.treatmentOutcome}}</td>
+        </tr>
+      </table>
+      <div :class="{ active: printIsShow }"></div>
     </div>
     <a-modal
       title="查看病人信息"
@@ -556,6 +587,11 @@ import { downloadFileFromResource } from '@/utils/file'
   export default {
     data() {
       return {
+        printObj: {
+          id: 'printMe',
+          popTitle: '病人信息打印'
+        },
+        printIsShow: false,
         currentCaseId: '',
         currentIndex: 0,
         allCurrentCaseId: [],
@@ -881,8 +917,7 @@ import { downloadFileFromResource } from '@/utils/file'
             if(item.doctorName === data.doctor) {
               self.editObj.currentCaseId = item.doctorId;
             }
-          })
-          console.log(self.editObj);
+          });
           self.getImgList(data.caseNo);
         }
       },
@@ -1098,7 +1133,7 @@ import { downloadFileFromResource } from '@/utils/file'
       // 处理导出
       handleExport() {
         const self = this;
-        if (self.allCurrentCaseId.length === 0) {
+        // if (self.allCurrentCaseId.length === 0) {
           const params = {
             "caseNo": self.searchObj.hospitalNum,
             "diagnosis": self.searchObj.zdData,
@@ -1120,15 +1155,15 @@ import { downloadFileFromResource } from '@/utils/file'
             .catch(() => {
             self.$message.error('导出失败');
           });
-        } else {
-          const params = self.allCurrentCaseId;
+        // } else {
+        //   const params = self.allCurrentCaseId;
           // self.$http.post('/patientcaserecord', params, {
           //   responseType: 'blob'
           // }).then(res => downloadFileFromResource(res))
           //   .catch(() => {
           //   self.$message.error('导出失败');
           // });
-        }
+        // }
       },
       handleMultDelete() {
         this.delMulModalVisible = true;
@@ -1171,9 +1206,17 @@ import { downloadFileFromResource } from '@/utils/file'
           ryStartDetailDate:'',
           ryEndDate: '',
           ryEndDetailDate:'',
-          sex: 0,
+          sex: 3,
           currentCaseId:[],
         }
+      },
+      // 打印
+      handlePrint() {
+        // this.$print(this.$refs.printss);
+        this.printIsShow = true;
+        setTimeout(() => {
+          this.printIsShow = false;
+        }, 0);
       }
     },
     computed: {
@@ -1418,6 +1461,17 @@ import { downloadFileFromResource } from '@/utils/file'
 </style>
 <style lang="scss" scoped>
 .patient-content {
+  #printMe {
+    position: relative;
+    .active {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: #fff;
+    }
+  }
   padding-bottom: 20px;
   .head-title {
     height: 36px;

@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
 import AddPatient from '../views/patient/AddPatient.vue'
 import SearchPatient from '../views/patient/SearchPatient.vue'
 import AddCase from '../views/case/CaseAdd.vue'
@@ -15,38 +14,39 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'addpatient_sub1',
+    component: AddPatient
   },
   {
     path: '/addpatient',
-    name: 'addpatient',
+    name: 'addpatient_sub1',
     component: AddPatient
   },
   {
     path: '/searchpatient',
-    name: 'searchpatient',
+    name: 'searchpatient_sub1',
     component: SearchPatient
   },
   {
     path: '/addcase',
-    name: 'addcase',
+    name: 'addcase_sub2',
     component: AddCase
   },
   {
     path: '/searchcase',
-    name: 'searchcase',
+    name: 'searchcase_sub2',
     component: SearchCase
   },
   {
     path: '/dictionary',
-    name: 'dictionary',
+    name: 'dictionary_sub3',
     component: DictionaryManage
   },
   {
     path: '/exportbase',
-    name: 'exportbase',
-    component: ExportBase
+    name: 'exportbase_sub4',
+    component: ExportBase,
+    dkey: 'sub4'
   }
 ]
 

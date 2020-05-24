@@ -197,8 +197,7 @@
         }];
         console.log(params);
         self.$http.post('/dictionary/multipleDelete', params)
-        .then((res) => {
-          debugger;
+        .then(() => {
           self.$message.success('删除成功');
           switch(self.currentType) {
             case 'DIAGNOSIS_TYPE':
@@ -226,7 +225,7 @@
           value: self.inputValue
         };
         self.$http.post('/dictionary/addition', params)
-        .then((res) => {
+        .then(() => {
           self.inputValue = '';
           self.$message.success('添加成功');
           switch(self.currentType) {
