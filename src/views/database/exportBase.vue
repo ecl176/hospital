@@ -148,7 +148,6 @@ import { downloadFileFromResource } from '@/utils/file'
             self.$message.success('上传成功');
             self.imageSuccessInfo.push(res.data.importInfo);
           }).catch(() => {
-            debugger;
             self.allImageData = null;
             self.allImageData = new FormData();
             self.photoIsLoading = false;
