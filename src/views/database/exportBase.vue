@@ -97,7 +97,11 @@ import { downloadFileFromResource } from '@/utils/file'
           self.allFileNum = 0;
           self.photoIsLoading = true;
           const params = self.allImageData;
-          self.$http.post('/database/import/image', params)
+          self.$http.post('/database/import/image', params, {
+            headers: {
+              'Content-Type':'multipart/form-data'
+            }
+          })
           .then((res) => {
             self.allImageData = [];
             self.photoIsLoading = false;

@@ -161,7 +161,7 @@
       </div>
       </a-table>
     </div>
-    <!-- <div class="page-box" v-show="pager.total > pager.pageSize">
+    <div class="page-box" v-show="pager.total !== 0">
       <span>总共{{pager.total}}条数据</span>
       <div class="page-label">
         <a-pagination
@@ -169,10 +169,11 @@
           v-model="pager.pageNo"
           :page-size.sync="pager.pageSize"
           :total="pager.total"
-          @showSizeChange="onShowSizeChange"
+          @change="onPageChange"
+          @showSizeChange = "onShowSizeChange"
         />
       </div>
-    </div> -->
+    </div>
     <div id="printMe" v-show="printIsShow">
       <table border="1">
         <tr>
@@ -806,7 +807,9 @@ import { downloadFileFromResource } from '@/utils/file'
         if (self.searchObj.sex === 3) {
           searchParams.patientGender = '';
         }
-        self.$http.post('/patientcase', searchParams)
+        const pageNo = self.pager.pageNo - 1;
+        const url = '/patientcase?page='+ pageNo +'&size='+ self.pager.pageSize +'&sort=caseNo,desc';
+        self.$http.post(url, searchParams)
         .then((res) => {
           const data = res.data.list;
           data.forEach((item, index) => {
@@ -848,6 +851,7 @@ import { downloadFileFromResource } from '@/utils/file'
 
           });
           self.tableData = data;
+          self.pager.total = res.data.total;
         }).catch((err) => {
           console.log(err);
         });
@@ -1190,6 +1194,13 @@ import { downloadFileFromResource } from '@/utils/file'
         const self = this;
         self.pager.pageNo = current;
         self.pageSize = pageSize;
+        self.handleSearch();
+      },
+      onPageChange(current, pageSize) {
+        const self = this;
+        self.pager.pageNo = current;
+        self.pageSize = pageSize;
+        self.handleSearch();
       },
       resetForm() {
         this.searchObj = {

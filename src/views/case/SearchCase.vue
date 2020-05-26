@@ -53,6 +53,19 @@
         </div>
       </a-table>
     </div>
+    <div class="page-box" v-show="pager.total !== 0">
+      <span>总共{{pager.total}}条数据</span>
+      <div class="page-label">
+        <a-pagination
+          show-size-changer
+          v-model="pager.pageNo"
+          :page-size.sync="pager.pageSize"
+          :total="pager.total"
+          @change="onPageChange"
+          @showSizeChange = "onShowSizeChange"
+        />
+      </div>
+    </div>
     <a-modal
       v-model="delModalVisible"
       title=""
@@ -176,6 +189,11 @@
         },
         tableCurrentIndex: 0,
         editCaseInfoVisible: false,
+        pager: {
+          pageNo: 1,
+          pageSize: 20,
+          total: 0
+        }
       };
     },
     mounted() {
@@ -213,7 +231,9 @@
         if(self.sex === 3) {
           params.doctorGender = '';
         }
-        self.$http.post('/doctor', params)
+        const pageNo = self.pager.pageNo - 1;
+        const url = '/doctor?page='+ pageNo +'&size='+ self.pager.pageSize;
+        self.$http.post(url, params)
         .then((res) => {
           const data = res.data.list;
           let allTableData = [];
@@ -236,6 +256,7 @@
             allTableData.push(obj);
           });
           self.tableData = allTableData;
+          self.pager.total = res.data.total;
         }).catch(() => {
           self.$message.error('请求失败');
         });
@@ -248,7 +269,9 @@
           doctorName: self.caseName,
           titleType: ''
         };
-        self.$http.post('/doctor', params)
+        const pageNo = self.pager.pageNo - 1;
+        const url = '/doctor?page='+ pageNo +'&size='+ self.pager.pageSize;
+        self.$http.post(url, params)
         .then((res) => {
           const data = res.data.list;
           let allTableData = [];
@@ -271,6 +294,7 @@
             allTableData.push(obj);
           });
           self.tableData = allTableData;
+          self.pager.total = res.data.total;
         }).catch(() => {
           self.$message.error('请求失败');
         });
@@ -373,7 +397,19 @@
       handleEditCaseChange(item) {
         this.editObj.currentCaseName = [];
         this.editObj.currentCaseName.push(item);
-      }
+      },
+      onShowSizeChange(current, pageSize) {
+        const self = this;
+        self.pager.pageNo = current;
+        self.pageSize = pageSize;
+        self.handleSearch();
+      },
+      onPageChange(current, pageSize) {
+        const self = this;
+        self.pager.pageNo = current;
+        self.pageSize = pageSize;
+        self.handleSearch();
+      },
     },
     computed: {
       rowSelection() {
@@ -457,6 +493,13 @@
           margin-left: 0;
         }
       }
+    }
+  }
+  .page-box {
+    margin-left: 15px;
+    .page-label {
+      float: right;
+      margin-right: 5px;
     }
   }
 }
