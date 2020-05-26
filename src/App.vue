@@ -107,10 +107,9 @@ moment.locale('zh-cn');
     top: 0;
     right: 0;
     bottom: 0;
-    // background: chartreuse;
     // background-image: url(./assets/img/1.png);
     pointer-events: none;
-    z-index: 99999;
+    // z-index: 99999;
     // opacity: .7;
   }
 }

@@ -6,14 +6,37 @@
     <div class="export-box">
       <a-upload
         name="file"
-        :multiple="true"
-        :beforeUpload="beforeUpload"
+        :multiple="false"
         :customRequest = 'customRequest'
-        accept="image/*, .xlsx, .xls"
+        accept=".xlsx, .xls"
       >
-        <a-button type="primary">上传</a-button>
+        <a-button type="primary">上传数据表</a-button>
+      </a-upload>
+      <div>
+        <p>{{exportFileInfo}}</p>
+      </div>
+      <a-upload
+        name="file"
+        :multiple="true"
+        :beforeUpload="beforeUploadphoto"
+        :customRequest = 'customRequestphoto'
+        accept="image/*"
+      >
+        <a-button type="primary">上传病例图片</a-button>
       </a-upload>
       <a-button type="primary" style="margin-left: 20px;" @click="hancleExport">导出</a-button>
+      <a-modal
+        v-model="modalVisible"
+        title=""
+        @ok="handleExportInfo"
+        @cancel="handleCloseDelMulModatl"
+        okText="是"
+        cancelText="否"
+        closable=false
+        >
+        <p style="font-size:16px;margin: 10px 0 0; color: red;">重要提示</p>
+        <p style="font-size:16px;margin: 10px 0 0;">您导出后希望清空数据库、照片数据库吗？如果确定请选择是，否则选择否。</p>
+      </a-modal>
     </div>
   </div>
 </template>
@@ -23,8 +46,10 @@ import { downloadFileFromResource } from '@/utils/file'
     data() {
       return {
         allImageData:[],
-        fileData: [],
-        allFileNum: 0
+        allFileNum: 0,
+        modalVisible: false,
+        isResetData: false,
+        exportFileInfo: ''
       };
     },
     mounted() {
@@ -32,6 +57,44 @@ import { downloadFileFromResource } from '@/utils/file'
     methods: {
       hancleExport() {
         const self = this;
+        self.modalVisible = true;
+      },
+      customRequest(file) {
+        const self = this;
+        const formData = new FormData();
+        formData.append('dataFile', file.file);
+        self.$http.post('/database/import/data', formData)
+        .then((res) => {
+          const data = res.data;
+          self.exportFileInfo = data.importInfo;
+        }).catch(() => {
+          self.$message.error('上传失败');
+        });
+      },
+      beforeUploadphoto(file) {
+        const formData = new FormData();
+        formData.append('imageFiles', file.file);
+        this.allImageData.push(formData);
+      },
+      customRequestphoto() {
+        const self = this;
+        self.allFileNum += 1;
+        if(self.allFileNum == self.allImageData.length) {
+          self.allFileNum = 0;
+          const params = self.allImageData;
+          self.$http.post('/database/import/image', params)
+          .then((res) => {
+            debugger;
+            self.allImageData = [];
+          }).catch(() => {
+            self.allImageData = [];
+            self.$message.error('上传失败');
+          });
+        }
+      },
+      handleExportInfo() {
+        const self = this;
+        self.modalVisible = false;
         const params = {
           "truncateDatabase": true
         };
@@ -44,44 +107,21 @@ import { downloadFileFromResource } from '@/utils/file'
           self.$message.error('请求失败');
         });
       },
-      beforeUpload(file) {
-        const formData = new FormData();
-        formData.append('file', file.file);
-        if(file.type.indexOf('image') !== -1) {
-          this.allImageData.push(formData);
-        } else {
-          this.fileData = [];
-          this.fileData.push(formData);
-        }
-      },
-      customRequest() {
+      handleCloseDelMulModatl() {
         const self = this;
-        self.allFileNum += 1;
-        if(self.allFileNum == self.allImageData.length + self.fileData.length) {
-          self.allFileNum = 0;
-          if(self.allImageData.length > 0) {
-            const params = self.allImageData;
-            self.$http.post('/database/import/image', params)
-            .then((res) => {
-              debugger;
-            }).catch(() => {
-              self.allImageData = [];
-              self.$message.error('上传失败');
-            });
-          }
-          if(self.fileData.length > 0) {
-            const params = self.fileData[0];
-            self.$http.post('/database/import/data', params)
-            .then((res) => {
-              debugger;
-            }).catch(() => {
-              self.fileData = [];
-              self.$message.error('上传失败');
-            });
-          }
-        }
-      },
-
+        self.modalVisible = false;
+        const params = {
+          "truncateDatabase": false
+        };
+        self.$http.post('/database/export', params, {
+          responseType: 'blob'
+        })
+        .then((res) => {
+          downloadFileFromResource(res)
+        }).catch(() => {
+          self.$message.error('请求失败');
+        });
+      }
     }
   };
 </script>
@@ -104,9 +144,6 @@ import { downloadFileFromResource } from '@/utils/file'
     }
     .export-box {
       padding-left: 20px;
-      > span {
-        float: left !important;
-      }
     }
   }
 </style>
