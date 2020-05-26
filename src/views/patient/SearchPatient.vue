@@ -1001,7 +1001,7 @@ import { downloadFileFromResource } from '@/utils/file'
         const formData = new FormData();
         formData.append('image', file.file);
         formData.append('type', 'INTRA_OPERATIVE_IMAGE_TYPE');
-        formData.append('caseNo', self.patientId);
+        formData.append('caseNo', self.editObj.hospitalNum);
         self.$http.post('/image', formData)
         .then((res) => {
           self.editObj.isLoadingImg = false;
@@ -1023,7 +1023,7 @@ import { downloadFileFromResource } from '@/utils/file'
         const formData = new FormData();
         formData.append('image', file.file);
         formData.append('type', 'POST_OPERATIVE_IMAGE_TYPE');
-        formData.append('caseNo', self.patientId);
+        formData.append('caseNo', self.editObj.hospitalNum);
         self.$http.post('/image', formData)
         .then((res) => {
           self.editObj.isLoadingImg = false;
