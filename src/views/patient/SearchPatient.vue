@@ -236,12 +236,14 @@
           <td>{{checkObj.treatmentMethod}}</td>
           <td>治疗结果</td>
           <td>{{checkObj.treatmentOutcome}}</td>
-          <td>入院日期</td>
-          <td>{{checkObj.admissionDate}}</td>
+          <td>手术方式</td>
+          <td>{{checkObj.operationName}}</td>
         </tr>
         <tr>
+          <td>入院日期</td>
+          <td>{{checkObj.admissionDate}}</td>
           <td>备注</td>
-          <td colspan="5" style="text-align: left; padding-left: 10px;">{{checkObj.caseComment}}</td>
+          <td colspan="3" style="text-align: left; padding-left: 10px;">{{checkObj.caseComment}}</td>
         </tr>
       </table>
       <div class="check-modal-photo-box">
@@ -1138,7 +1140,7 @@ import { downloadFileFromResource } from '@/utils/file'
       handleExport() {
         const self = this;
         // if (self.allCurrentCaseId.length === 0) {
-          const params = {
+          let params = {
             "caseNo": self.searchObj.hospitalNum,
             "diagnosis": self.searchObj.zdData,
             "doctorIds": self.searchObj.currentCaseId,
@@ -1153,6 +1155,9 @@ import { downloadFileFromResource } from '@/utils/file'
             "treatmentMethod": self.searchObj.zlfsData,
             "treatmentOutcome": self.searchObj.zljgData
           };
+          if(self.searchObj.sex === 3) {
+            params.patientGender = '';
+          }
           self.$http.post('/patientcaserecord', params, {
             responseType: 'blob'
           }).then(res => downloadFileFromResource(res))

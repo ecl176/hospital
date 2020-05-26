@@ -4,17 +4,39 @@
       <span>数据管理</span>
     </p>
     <div class="export-box">
+      <!-- <a-button type="primary" icon="download" style="margin-top: 15px;" :disabled="exportIsLoading" @click="hancleExport">导出</a-button> -->
+      <div class="btn-icon" @click="hancleExport" style="margin-bottom: 15px;">
+        <p class="ant-upload-drag-icon">
+          <a-icon type="download" style="color: #40a9ff;font-size: 48px;"/>
+        </p>
+        <p class="ant-upload-text" style="margin-bottom: 0;">
+          导出excel数据以及照片
+        </p>
+      </div>
+      <div class="exportinfo">
+        <a-spin tip="导出中，请稍等..." v-show="exportIsLoading" style="text-align:center;"/>
+      </div>
       <a-upload
         name="file"
         :multiple="false"
         :customRequest = 'customRequest'
         accept=".xlsx, .xls"
       >
-        <a-button type="primary" icon="upload">上传数据表格</a-button>
+        <!-- <a-button type="primary" icon="upload">上传数据表格</a-button> -->
+        <div class="btn-icon">
+          <p class="ant-upload-drag-icon">
+            <a-icon type="inbox" style="color: #40a9ff;font-size: 48px;"/>
+          </p>
+          <p class="ant-upload-text">
+            点击上传excel数据
+          </p>
+        </div>
       </a-upload>
       <div class="datainfo">
-        <p>{{exportFileInfo}}</p>
-        <a-spin tip="上传中，请稍等..." v-show="dataIsLoading" style="text-align:center;margin: 15px 0 15px 30px;"/>
+        <p v-for="(item, index) in exportFileInfo.split(';')" :key="index">
+          {{item}}
+        </p>
+        <a-spin tip="上传中，请稍等..." v-show="dataIsLoading" style="text-align:center;"/>
       </div>
       <a-upload
         name="file"
@@ -23,15 +45,24 @@
         :customRequest = 'customRequestphoto'
         accept="image/*"
       >
-        <a-button type="primary" icon="upload">上传病例图片</a-button>
+        <!-- <a-button type="primary" icon="upload">上传病例图片</a-button> -->
+        <div class="btn-icon">
+          <p class="ant-upload-drag-icon">
+            <a-icon type="inbox" style="color: #40a9ff;font-size: 48px;"/>
+          </p>
+          <p class="ant-upload-text">
+            上传病例图片
+          </p>
+        </div>
       </a-upload>
       <div class="photoinfo">
-        <a-spin tip="上传中，请稍等..." v-show="photoIsLoading" style="text-align:center;margin: 15px 0 15px 30px;"/>
+        <p v-for="(item, index) in imageSuccessInfo" :key="index">
+          {{item}}
+        </p>
+        <a-spin tip="上传中，请稍等..." v-show="photoIsLoading" style="text-align:center;"/>
       </div>
-      <a-button type="primary" icon="download" style="margin-top: 15px;" :disabled="exportIsLoading" @click="hancleExport">导出</a-button>
-      <div class="exportinfo">
-        <a-spin tip="导出中，请稍等..." v-show="exportIsLoading" style="text-align:center;margin: 15px 0 15px 30px;"/>
-      </div>
+
+      
       <a-modal
         v-model="modalVisible"
         title=""
@@ -60,7 +91,8 @@ import { downloadFileFromResource } from '@/utils/file'
         exportFileInfo: '',
         dataIsLoading: false,
         photoIsLoading: false,
-        exportIsLoading: false
+        exportIsLoading: false,
+        imageSuccessInfo: []
       };
     },
     mounted() {
@@ -68,7 +100,9 @@ import { downloadFileFromResource } from '@/utils/file'
     methods: {
       hancleExport() {
         const self = this;
-        self.modalVisible = true;
+        if(!self.exportIsLoading) {
+          self.modalVisible = true;
+        }
       },
       customRequest(file) {
         const self = this;
@@ -107,11 +141,12 @@ import { downloadFileFromResource } from '@/utils/file'
               'Content-Type':'multipart/form-data'
             }
           })
-          .then(() => {
+          .then((res) => {
             self.allImageData = null;
             self.allImageData = new FormData();
             self.photoIsLoading = false;
             self.$message.success('上传成功');
+            self.imageSuccessInfo.push(res.data.importInfo);
           }).catch(() => {
             debugger;
             self.allImageData = null;
@@ -167,6 +202,9 @@ import { downloadFileFromResource } from '@/utils/file'
     .ant-upload-list {
       display: none !important;
     }
+    .ant-upload {
+      width: 100%;
+    }
   }
 </style>
 <style lang="scss" scoped>
@@ -181,7 +219,41 @@ import { downloadFileFromResource } from '@/utils/file'
     }
     .export-box {
       padding-left: 20px;
+      padding-right: 20px;
+      .exportinfo {
+        .ant-spin {
+          width: 100%;
+          margin-bottom: 15px;
+        }
+      }
       .datainfo {
+        padding-top: 15px;
+        padding-left: 15px;
+        .ant-spin {
+          width: 100%;
+          margin-bottom: 15px;
+        }
+      }
+      .photoinfo {
+        padding-top: 15px;
+        padding-left: 15px;
+        .ant-spin {
+          width: 100%;
+        }
+      }
+      .btn-icon {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        background: #fafafa;
+        border: 1px dashed #d9d9d9;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 15px 0;
+        .ant-upload-text {
+          margin-top: 10px;
+        }
       }
     }
   }
