@@ -10,10 +10,11 @@
         :customRequest = 'customRequest'
         accept=".xlsx, .xls"
       >
-        <a-button type="primary">上传数据表</a-button>
+        <a-button type="primary" icon="upload">上传数据表格</a-button>
       </a-upload>
-      <div>
+      <div class="datainfo">
         <p>{{exportFileInfo}}</p>
+        <a-spin tip="上传中，请稍等..." v-show="dataIsLoading" style="text-align:center;margin: 15px 0 15px 30px;"/>
       </div>
       <a-upload
         name="file"
@@ -22,9 +23,15 @@
         :customRequest = 'customRequestphoto'
         accept="image/*"
       >
-        <a-button type="primary">上传病例图片</a-button>
+        <a-button type="primary" icon="upload">上传病例图片</a-button>
       </a-upload>
-      <a-button type="primary" style="margin-left: 20px;" @click="hancleExport">导出</a-button>
+      <div class="photoinfo">
+        <a-spin tip="上传中，请稍等..." v-show="photoIsLoading" style="text-align:center;margin: 15px 0 15px 30px;"/>
+      </div>
+      <a-button type="primary" icon="download" style="margin-top: 15px;" :disabled="exportIsLoading" @click="hancleExport">导出</a-button>
+      <div class="exportinfo">
+        <a-spin tip="导出中，请稍等..." v-show="exportIsLoading" style="text-align:center;margin: 15px 0 15px 30px;"/>
+      </div>
       <a-modal
         v-model="modalVisible"
         title=""
@@ -49,7 +56,10 @@ import { downloadFileFromResource } from '@/utils/file'
         allFileNum: 0,
         modalVisible: false,
         isResetData: false,
-        exportFileInfo: ''
+        exportFileInfo: '',
+        dataIsLoading: false,
+        photoIsLoading: false,
+        exportIsLoading: false
       };
     },
     mounted() {
@@ -63,11 +73,15 @@ import { downloadFileFromResource } from '@/utils/file'
         const self = this;
         const formData = new FormData();
         formData.append('dataFile', file.file);
+        self.dataIsLoading = true;
         self.$http.post('/database/import/data', formData)
         .then((res) => {
           const data = res.data;
           self.exportFileInfo = data.importInfo;
+          self.dataIsLoading = false;
+          self.$message.success('上传成功');
         }).catch(() => {
+          self.dataIsLoading = false;
           self.$message.error('上传失败');
         });
       },
@@ -81,13 +95,16 @@ import { downloadFileFromResource } from '@/utils/file'
         self.allFileNum += 1;
         if(self.allFileNum == self.allImageData.length) {
           self.allFileNum = 0;
+          self.photoIsLoading = true;
           const params = self.allImageData;
           self.$http.post('/database/import/image', params)
           .then((res) => {
-            debugger;
             self.allImageData = [];
+            self.photoIsLoading = false;
+            self.$message.success('上传成功');
           }).catch(() => {
             self.allImageData = [];
+            self.photoIsLoading = false;
             self.$message.error('上传失败');
           });
         }
@@ -98,12 +115,16 @@ import { downloadFileFromResource } from '@/utils/file'
         const params = {
           "truncateDatabase": true
         };
+        self.exportIsLoading = true;
         self.$http.post('/database/export', params, {
           responseType: 'blob'
         })
         .then((res) => {
-          downloadFileFromResource(res)
+          self.exportIsLoading = false;
+          downloadFileFromResource(res);
+          self.$message.success('导出成功');
         }).catch(() => {
+          self.exportIsLoading = false;
           self.$message.error('请求失败');
         });
       },
@@ -113,12 +134,16 @@ import { downloadFileFromResource } from '@/utils/file'
         const params = {
           "truncateDatabase": false
         };
+        self.exportIsLoading = true;
         self.$http.post('/database/export', params, {
           responseType: 'blob'
         })
         .then((res) => {
-          downloadFileFromResource(res)
+          downloadFileFromResource(res);
+          self.$message.success('导出成功');
+          self.exportIsLoading = false;
         }).catch(() => {
+          self.exportIsLoading = false;
           self.$message.error('请求失败');
         });
       }
@@ -144,6 +169,8 @@ import { downloadFileFromResource } from '@/utils/file'
     }
     .export-box {
       padding-left: 20px;
+      .datainfo {
+      }
     }
   }
 </style>
