@@ -14,7 +14,7 @@
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">主治医师</label>
-            <a-select style="width:100%;" @change="handleSearchCaseChange" placeholder="请选择主治医生">
+            <a-select style="width:100%;" @change="handleSearchCaseChange" :value="searchObj.currentCaseName" placeholder="请选择主治医生">
               <a-select-option v-for="(item, index) in caseData" :key="index" :value="item"
                 >{{item}}</a-select-option
               >
