@@ -52,8 +52,9 @@ import { downloadFileFromResource } from '@/utils/file'
   export default {
     data() {
       return {
-        allImageData:[],
+        allImageData: new FormData(),
         allFileNum: 0,
+        formDatasNum: 0,
         modalVisible: false,
         isResetData: false,
         exportFileInfo: '',
@@ -85,16 +86,20 @@ import { downloadFileFromResource } from '@/utils/file'
           self.$message.error('上传失败');
         });
       },
-      beforeUploadphoto(file) {
-        const formData = new FormData();
-        formData.append('imageFiles', file.file);
-        this.allImageData.push(formData);
+      beforeUploadphoto() {
+        // const formData = new FormData();
+        // formData.append('imageFiles', file.file);
+        // this.allImageData.push(formData);
+        this.formDatasNum += 1;
+        // this.allImageData.append('imageFiles', file.file);
       },
-      customRequestphoto() {
+      customRequestphoto(file) {
         const self = this;
         self.allFileNum += 1;
-        if(self.allFileNum == self.allImageData.length) {
+        self.allImageData.append('imageFiles', file.file);
+        if(self.allFileNum == self.formDatasNum && self.allFileNum !== 0) {
           self.allFileNum = 0;
+          self.formDatasNum = 0;
           self.photoIsLoading = true;
           const params = self.allImageData;
           self.$http.post('/database/import/image', params, {
@@ -102,12 +107,15 @@ import { downloadFileFromResource } from '@/utils/file'
               'Content-Type':'multipart/form-data'
             }
           })
-          .then((res) => {
-            self.allImageData = [];
+          .then(() => {
+            self.allImageData = null;
+            self.allImageData = new FormData();
             self.photoIsLoading = false;
             self.$message.success('上传成功');
           }).catch(() => {
-            self.allImageData = [];
+            debugger;
+            self.allImageData = null;
+            self.allImageData = new FormData();
             self.photoIsLoading = false;
             self.$message.error('上传失败');
           });
