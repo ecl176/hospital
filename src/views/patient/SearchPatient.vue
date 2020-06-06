@@ -142,8 +142,8 @@
       <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
     </div>
     <div class="table-btns">
-      <a-button type="primary" @click="handleMultDelete" :disabled="allCurrentCaseId.length === 0">删除</a-button>
-      <a-button type="primary" @click="handleExport">导出</a-button>
+      <a-button type="primary" @click="handleMultDelete" :disabled="allCurrentCaseId.length === 0 || !!isExporting">删除</a-button>
+      <a-button type="primary" @click="handleExport" :loading="!!isExporting">导出</a-button>
       <a-button type="primary" v-print="printObj" @click="handlePrint">打印</a-button>
     </div>
     <div class="table-box">
@@ -189,19 +189,40 @@
           <th>治疗方式</th>
           <th>治疗结果</th>
         </tr>
-        <tr v-for="(item,index) in tableData" :key="index">
-          <td>{{item.caseNo}}</td>
-          <td>{{item.admissionDate}}</td>
-          <td>{{item.patientName}}</td>
-          <td>{{item.patientAge}}</td>
-          <td>{{item.patientGender}}</td>
-          <td>{{item.phoneNumber}}</td>
-          <td>{{item.doctor}}</td>
-          <td>{{item.diagnosis}}</td>
-          <td>{{item.operationName}}</td>
-          <td>{{item.treatmentMethod}}</td>
-          <td>{{item.treatmentOutcome}}</td>
-        </tr>
+        <template v-if="printData.length === 0">
+          <div>
+            <tr v-for="(item,index) in tableData" :key="index">
+              <td>{{item.caseNo}}</td>
+              <td>{{item.admissionDate}}</td>
+              <td>{{item.patientName}}</td>
+              <td>{{item.patientAge}}</td>
+              <td>{{item.patientGender}}</td>
+              <td>{{item.phoneNumber}}</td>
+              <td>{{item.doctor}}</td>
+              <td>{{item.diagnosis}}</td>
+              <td>{{item.operationName}}</td>
+              <td>{{item.treatmentMethod}}</td>
+              <td>{{item.treatmentOutcome}}</td>
+            </tr>
+          </div>
+        </template>
+        <template v-if="printData.length > 0">
+          <div>
+            <tr v-for="(item,index) in printData" :key="index">
+              <td>{{item.caseNo}}</td>
+              <td>{{item.admissionDate}}</td>
+              <td>{{item.patientName}}</td>
+              <td>{{item.patientAge}}</td>
+              <td>{{item.patientGender}}</td>
+              <td>{{item.phoneNumber}}</td>
+              <td>{{item.doctor}}</td>
+              <td>{{item.diagnosis}}</td>
+              <td>{{item.operationName}}</td>
+              <td>{{item.treatmentMethod}}</td>
+              <td>{{item.treatmentOutcome}}</td>
+            </tr>
+          </div>
+        </template>
       </table>
       <div :class="{ active: printIsShow }"></div>
     </div>
@@ -590,6 +611,7 @@ import { downloadFileFromResource } from '@/utils/file'
   export default {
     data() {
       return {
+        isExporting: false,
         printObj: {
           id: 'printMe',
           popTitle: '病人信息打印'
@@ -608,6 +630,7 @@ import { downloadFileFromResource } from '@/utils/file'
         allZljgData: [],//所有治疗结果数据
         columns: columns, // 表格头
         tableData: [], // 表格数据
+        printData: [], // 打印数据
         checkPatientInfoVisible: false, //查看病人信息弹窗
         checkPreImageData:[],//弹窗病人术前照片
         checkIntraImageData:[],//弹窗病人术中照片
@@ -814,8 +837,8 @@ import { downloadFileFromResource } from '@/utils/file'
         self.$http.post(url, searchParams)
         .then((res) => {
           const data = res.data.list;
-          data.forEach((item, index) => {
-            item.key = index;
+          data.forEach((item) => {
+            item.key = item.caseNo;
             item.doctor = item.doctor ? item.doctor.doctorName : '';
             let diagnosisdata = [];
             item.diagnosis.forEach((list) => {
@@ -903,20 +926,22 @@ import { downloadFileFromResource } from '@/utils/file'
           const data = rowData;
           self.editObj.hospitalNum = data.caseNo;
           self.editObj.currentCaseName = [];
-          self.editObj.currentCaseName.push(data.doctor);
+          if(data.doctor) {
+            self.editObj.currentCaseName.push(data.doctor);
+          }
           self.editObj.zdData = [];
-          self.editObj.zdData = data.diagnosis.split(',');
+          self.editObj.zdData = data.diagnosis === '' ? [] : data.diagnosis.split(',');
           self.editObj.ssfsData = [];
-          self.editObj.ssfsData = data.operationName.split(',');
+          self.editObj.ssfsData = data.operationName === '' ? [] : data.operationName.split(',');
           self.editObj.zlfsData = [];
-          self.editObj.zlfsData = data.treatmentMethod.split(',');
+          self.editObj.zlfsData = data.treatmentMethod === '' ? [] : data.treatmentMethod.split(',');
           self.editObj.zljgData = [];
-          self.editObj.zljgData = data.treatmentOutcome.split(',');
+          self.editObj.zljgData = data.treatmentOutcome === '' ? [] : data.treatmentOutcome.split(',');
           self.editObj.patientName = data.patientName;
           self.editObj.sex = data.patientGender === '男' ? 0 : 1;
           self.editObj.age = data.patientAge;
           self.editObj.photoNum = data.phoneNumber;
-          self.editObj.ryDate = moment(data.admissionDate, 'YYYY-MM-DD');
+          self.editObj.ryDate = data.admissionDate ? moment(data.admissionDate, 'YYYY-MM-DD') : '';
           self.editObj.ryDetailDate = data.admissionDate;
           self.editObj.remarks = data.caseComment ? data.caseComment : '';
           self.allCaseData.forEach((item) => {
@@ -1139,40 +1164,52 @@ import { downloadFileFromResource } from '@/utils/file'
       // 处理导出
       handleExport() {
         const self = this;
-        // if (self.allCurrentCaseId.length === 0) {
-          let params = {
-            "caseNo": self.searchObj.hospitalNum,
-            "diagnosis": self.searchObj.zdData,
-            "doctorIds": self.searchObj.currentCaseId,
-            "endAdmissionDate": self.searchObj.ryEndDetailDate,
-            "maxPatientAge": self.searchObj.endage,
-            "minPatientAge": self.searchObj.startage,
-            "operationName": self.searchObj.ssfsData,
-            "patientGender": self.searchObj.sex == 0 ? '男' : '女',
-            "patientName": self.searchObj.patientName,
-            "phoneNumber": "",
-            "startAdmissionDate": self.searchObj.ryStartDetailDate,
-            "treatmentMethod": self.searchObj.zlfsData,
-            "treatmentOutcome": self.searchObj.zljgData
-          };
-          if(self.searchObj.sex === 3) {
-            params.patientGender = '';
+        if (!self.isExporting) {
+          self.isExporting = true;
+          if (self.allCurrentCaseId.length === 0) {
+            let params = {
+              "caseNo": self.searchObj.hospitalNum,
+              "diagnosis": self.searchObj.zdData,
+              "doctorIds": self.searchObj.currentCaseId,
+              "endAdmissionDate": self.searchObj.ryEndDetailDate,
+              "maxPatientAge": self.searchObj.endage,
+              "minPatientAge": self.searchObj.startage,
+              "operationName": self.searchObj.ssfsData,
+              "patientGender": self.searchObj.sex == 0 ? '男' : '女',
+              "patientName": self.searchObj.patientName,
+              "phoneNumber": "",
+              "startAdmissionDate": self.searchObj.ryStartDetailDate,
+              "treatmentMethod": self.searchObj.zlfsData,
+              "treatmentOutcome": self.searchObj.zljgData
+            };
+            if(self.searchObj.sex === 3) {
+              params.patientGender = '';
+            }
+            self.$http.post('/patientcaserecord', params, {
+              responseType: 'blob'
+            }).then((res) => {
+              self.isExporting = false;
+              downloadFileFromResource(res);
+            }).catch(() => {
+              self.isExporting = false;
+              self.$message.error('导出失败');
+            });
+          } else {
+            const params = self.allCurrentCaseId;
+            self.$http.post('/patientcaserecord/caseNos', params, {
+              responseType: 'blob'
+            }).then((res) => {
+              debugger;
+              self.isExporting = false;
+              downloadFileFromResource(res);
+            }).catch(() => {
+              self.isExporting = false;
+              self.$message.error('导出失败');
+            });
           }
-          self.$http.post('/patientcaserecord', params, {
-            responseType: 'blob'
-          }).then(res => downloadFileFromResource(res))
-            .catch(() => {
-            self.$message.error('导出失败');
-          });
-        // } else {
-        //   const params = self.allCurrentCaseId;
-          // self.$http.post('/patientcaserecord', params, {
-          //   responseType: 'blob'
-          // }).then(res => downloadFileFromResource(res))
-          //   .catch(() => {
-          //   self.$message.error('导出失败');
-          // });
-        // }
+        } else {
+          self.$message.warning('正在导出，请稍等...');
+        }
       },
       handleMultDelete() {
         this.delMulModalVisible = true;
@@ -1245,6 +1282,7 @@ import { downloadFileFromResource } from '@/utils/file'
             selectedRows.forEach((item) => {
               self.allCurrentCaseId.push(item.caseNo);
             });
+            self.printData = selectedRows;
           }
         };
       },

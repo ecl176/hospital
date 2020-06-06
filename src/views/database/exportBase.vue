@@ -7,7 +7,8 @@
       <!-- <a-button type="primary" icon="download" style="margin-top: 15px;" :disabled="exportIsLoading" @click="hancleExport">导出</a-button> -->
       <div class="btn-icon" @click="hancleExport" style="margin-bottom: 15px;">
         <p class="ant-upload-drag-icon">
-          <a-icon type="download" style="color: #40a9ff;font-size: 48px;"/>
+          <a-icon type="download" style="color: #40a9ff;font-size: 48px;" v-show="!exportIsLoading"/>
+          <a-icon type="download" style="color: #ddd;font-size: 48px;" v-show="exportIsLoading"/>
         </p>
         <p class="ant-upload-text" style="margin-bottom: 0;">
           导出excel数据以及照片
@@ -21,11 +22,13 @@
         :multiple="false"
         :customRequest = 'customRequest'
         accept=".xlsx, .xls"
+        :disabled='dataIsLoading'
       >
         <!-- <a-button type="primary" icon="upload">上传数据表格</a-button> -->
         <div class="btn-icon">
           <p class="ant-upload-drag-icon">
-            <a-icon type="inbox" style="color: #40a9ff;font-size: 48px;"/>
+            <a-icon type="inbox" style="color: #40a9ff;font-size: 48px;" v-show="!dataIsLoading"/>
+            <a-icon type="inbox" style="color: #ddd;font-size: 48px;" v-show="dataIsLoading"/>
           </p>
           <p class="ant-upload-text">
             点击上传excel数据
@@ -44,11 +47,13 @@
         :beforeUpload="beforeUploadphoto"
         :customRequest = 'customRequestphoto'
         accept="image/*"
+        :disabled='photoIsLoading'
       >
         <!-- <a-button type="primary" icon="upload">上传病例图片</a-button> -->
         <div class="btn-icon">
           <p class="ant-upload-drag-icon">
-            <a-icon type="inbox" style="color: #40a9ff;font-size: 48px;"/>
+            <a-icon type="inbox" style="color: #40a9ff;font-size: 48px;" v-show="!photoIsLoading"/>
+            <a-icon type="inbox" style="color: #eee;font-size: 48px;" v-show="photoIsLoading"/>
           </p>
           <p class="ant-upload-text">
             上传病例图片
@@ -102,6 +107,8 @@ import { downloadFileFromResource } from '@/utils/file'
         const self = this;
         if(!self.exportIsLoading) {
           self.modalVisible = true;
+        } else {
+          self.$message.warning('正在导出中，请稍等...');
         }
       },
       customRequest(file) {
@@ -174,24 +181,26 @@ import { downloadFileFromResource } from '@/utils/file'
           self.$message.error('请求失败');
         });
       },
-      handleCloseDelMulModatl() {
-        const self = this;
-        self.modalVisible = false;
-        const params = {
-          "truncateDatabase": false
-        };
-        self.exportIsLoading = true;
-        self.$http.post('/database/export', params, {
-          responseType: 'blob'
-        })
-        .then((res) => {
-          downloadFileFromResource(res);
-          self.$message.success('导出成功');
-          self.exportIsLoading = false;
-        }).catch(() => {
-          self.exportIsLoading = false;
-          self.$message.error('请求失败');
-        });
+      handleCloseDelMulModatl(e) {
+        if(e.target.className === 'ant-btn') {
+          const self = this;
+          self.modalVisible = false;
+          const params = {
+            "truncateDatabase": false
+          };
+          self.exportIsLoading = true;
+          self.$http.post('/database/export', params, {
+            responseType: 'blob'
+          })
+          .then((res) => {
+            downloadFileFromResource(res);
+            self.$message.success('导出成功');
+            self.exportIsLoading = false;
+          }).catch(() => {
+            self.exportIsLoading = false;
+            self.$message.error('请求失败');
+          });
+        }
       }
     }
   };

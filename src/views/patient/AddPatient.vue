@@ -542,38 +542,38 @@
           "treatmentOutcome": self.zljgData,
           "caseComment": self.remarks
         };
-        if(params.admissionDate === '') {
-          self.$message.error('请输入入院日期');
-          return false;
-        }
-        if(params.attendingDoctorId === '') {
-          self.$message.error('请选择主治医生');
-          return false;
-        }
-        if(params.diagnosis.length === 0) {
-          self.$message.error('请选择诊断部位');
-          return false;
-        }
-        if(params.operationName.length === 0) {
-          self.$message.error('请选择手术方式');
-          return false;
-        }
+        // if(params.admissionDate === '') {
+        //   self.$message.error('请输入入院日期');
+        //   return false;
+        // }
+        // if(params.attendingDoctorId === '') {
+        //   self.$message.error('请选择主治医生');
+        //   return false;
+        // }
+        // if(params.diagnosis.length === 0) {
+        //   self.$message.error('请选择诊断部位');
+        //   return false;
+        // }
+        // if(params.operationName.length === 0) {
+        //   self.$message.error('请选择手术方式');
+        //   return false;
+        // }
         if(params.patientName === '') {
           self.$message.error('请输入病人姓名');
           return false;
         }
-        if(params.phoneNumber === '') {
-          self.$message.error('请输入病人联系电话');
-          return false;
-        }
-        if(params.treatmentMethod.length === 0) {
-          self.$message.error('请选择治疗方式');
-          return false;
-        }
-        if(params.treatmentOutcome.length === 0) {
-          self.$message.error('请选择治疗结果');
-          return false;
-        }
+        // if(params.phoneNumber === '') {
+        //   self.$message.error('请输入病人联系电话');
+        //   return false;
+        // }
+        // if(params.treatmentMethod.length === 0) {
+        //   self.$message.error('请选择治疗方式');
+        //   return false;
+        // }
+        // if(params.treatmentOutcome.length === 0) {
+        //   self.$message.error('请选择治疗结果');
+        //   return false;
+        // }
         self.$http.post('/patientcase/addition', params)
         .then(() => {
           self.resetForm();
