@@ -113,7 +113,7 @@
      // 获取所有诊断数据
       getDiagnosisData() {
         const self = this;
-        self.$http.get('/dictionary/DIAGNOSIS_TYPE').then((res) => {
+        self.$http.get('/swing/dictionary/DIAGNOSIS_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allZdData = [];
@@ -129,7 +129,7 @@
       //获取所有手术方式数据
       getOperationData() {
         const self = this;
-        self.$http.get('/dictionary/OPERATION_NAME_TYPE').then((res) => {
+        self.$http.get('/swing/dictionary/OPERATION_NAME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allSsfsData = [];
@@ -145,7 +145,7 @@
       // 获取所有治疗方式数据
       getTreatmentMethodData() {
         const self = this;
-        self.$http.get('/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
+        self.$http.get('/swing/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allZlfsData = [];
@@ -161,7 +161,7 @@
       //获取所有治疗结果数据
       getTreatmentOutcomeData() {
         const self = this;
-        self.$http.get('/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
+        self.$http.get('/swing/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allZljgData = [];
@@ -176,7 +176,7 @@
       },
       getCaseTitleType() {
         const self = this;
-        self.$http.get('/dictionary/TITLE_TYPE')
+        self.$http.get('/swing/dictionary/TITLE_TYPE')
         .then((res) => {
           if(res.status === 200) {
             const data = res.data;
@@ -196,7 +196,7 @@
           value: item
         }];
         console.log(params);
-        self.$http.post('/dictionary/multipleDelete', params)
+        self.$http.post('/swing/dictionary/multipleDelete', params)
         .then(() => {
           self.$message.success('删除成功');
           switch(self.currentType) {
@@ -212,6 +212,9 @@
             case 'TREATMENT_OUTCOME_TYPE':
               self.getTreatmentOutcomeData();
               break;
+            default:
+              self.getCaseTitleType();
+              break;
           }
         }).catch((err) => {
           console.log(err);
@@ -224,7 +227,7 @@
           type: type,
           value: self.inputValue
         };
-        self.$http.post('/dictionary/addition', params)
+        self.$http.post('/swing/dictionary/addition', params)
         .then(() => {
           self.inputValue = '';
           self.$message.success('添加成功');

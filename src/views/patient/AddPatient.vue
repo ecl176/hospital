@@ -1,7 +1,7 @@
 <template>
   <div class='patient-content'>
     <p class="head-title">
-      <span>病人信息登记</span>
+      <span>患者信息登记</span>
     </p>
     <div class="upload-box">
       <a-upload-dragger
@@ -38,8 +38,8 @@
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">病人姓名</label>
-            <a-input placeholder="请输入病人姓名" v-model='patientName' />
+            <label class="label">患者姓名</label>
+            <a-input placeholder="请输入患者姓名" v-model='patientName' />
           </div>
         </a-col>
       </a-row>
@@ -55,8 +55,8 @@
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">病人年龄</label>
-            <a-input placeholder="请输入病人年龄" v-model='age' type="number"/>
+            <label class="label">患者年龄</label>
+            <a-input placeholder="请输入患者年龄" v-model='age' type="number"/>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
@@ -165,78 +165,138 @@
       </div>
       <div class="photo-item">
         <label>术前</label>
-        <div class="upload-img-btn">
-          <a-upload
-            listType="picture-card"
-            class="avatar-uploader"
-            :showUploadList="false"
-            accept="image/*"
-            :customRequest='beforeImgUpload'
-          >
-            <div>
-              <a-icon type="plus" />
-              <div class="ant-upload-text">上传</div>
+        <a-button type="primary" @click="handleAddFloder('PRE_OPERATIVE_IMAGE_TYPE')" class="add-floder">新增批次</a-button>
+        <a-tabs v-model="preBath" v-show="preImageTabs.length > 0">
+          <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+            <div class="upload-img-btn">
+              <a-upload
+                listType="picture-card"
+                class="avatar-uploader"
+                :showUploadList="false"
+                accept="image/*"
+                :customRequest="beforeImgUpload"
+              >
+                <div>
+                  <a-icon type="plus" />
+                  <div class="ant-upload-text">上传</div>
+                </div>
+              </a-upload>
             </div>
-          </a-upload>
-        </div>
-        <div class="items-list" v-for="(item, index) in preImageData" :key="item.id">
-          <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
-            <a-icon type="delete" />
-          </a-button>
-          <img :src="item.src" alt="">
-        </div>
+            <div class="items-list" v-for="(item, indexs) in preImageData" :key="item.id" v-show="item.bath === items">
+              <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
+                <a-icon type="delete" />
+              </a-button>
+              <img :src="item.src" alt="" >
+            </div>
+          </a-tab-pane>
+        </a-tabs>
       </div>
       <div class="photo-item">
         <label>术中</label>
-        <div class="upload-img-btn">
-          <a-upload
-            listType="picture-card"
-            class="avatar-uploader"
-            :showUploadList="false"
-            accept="image/*"
-            :customRequest="intraImgUpload"
-          >
-            <div>
-              <a-icon type="plus" />
-              <div class="ant-upload-text">上传</div>
+        <a-button type="primary" class="add-floder" @click="handleAddFloder('INTRA_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
+        <a-tabs v-model="intraBath" @change="callback" v-show="intraImageTabs.length > 0">
+          <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+            <div class="upload-img-btn">
+              <a-upload
+                listType="picture-card"
+                class="avatar-uploader"
+                :showUploadList="false"
+                accept="image/*"
+                :customRequest="intraImgUpload"
+              >
+                <div>
+                  <a-icon type="plus" />
+                  <div class="ant-upload-text">上传</div>
+                </div>
+              </a-upload>
             </div>
-          </a-upload>
-        </div>
-        <div class="items-list" v-for="(item, index) in intraImageData" :key="item.id">
-          <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
-            <a-icon type="delete" />
-          </a-button>
-          <img :src="item.src" alt="">
-        </div>
+            <div class="items-list" v-for="(item, indexs) in intraImageData" :key="item.id" v-show="item.bath === items">
+              <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
+                <a-icon type="delete" />
+              </a-button>
+              <img :src="item.src" alt="" >
+            </div>
+          </a-tab-pane>
+        </a-tabs>
       </div>
       <div class="photo-item">
         <label>术后</label>
-        <div class="upload-img-btn">
-          <a-upload
-            listType="picture-card"
-            class="avatar-uploader"
-            :showUploadList="false"
-            accept="image/*"
-            :customRequest="afterImgUpload"
-          >
-            <div>
-              <a-icon type="plus" />
-              <div class="ant-upload-text">上传</div>
+        <a-button type="primary" class="add-floder" @click="handleAddFloder('POST_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
+        <a-tabs v-model="afterBath" defaultActiveKey="1" v-show="afterImageTabs.length > 0">
+          <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+            <div class="upload-img-btn">
+              <a-upload
+                listType="picture-card"
+                class="avatar-uploader"
+                :showUploadList="false"
+                accept="image/*"
+                :customRequest="afterImgUpload"
+              >
+                <div>
+                  <a-icon type="plus" />
+                  <div class="ant-upload-text">上传</div>
+                </div>
+              </a-upload>
             </div>
-          </a-upload>
-        </div>
-        <div class="items-list" v-for="(item, index) in afterImageData" :key="item.id">
-          <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,index)" type="primary">
-            <a-icon type="delete" />
-          </a-button>
-          <img :src="item.src" alt="">
-        </div>
+            <div class="items-list" v-for="(item, indexs) in afterImageData" :key="item.id" v-show="item.bath === items">
+              <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
+                <a-icon type="delete" />
+              </a-button>
+              <img :src="item.src" alt="" >
+            </div>
+          </a-tab-pane>
+        </a-tabs>
       </div>
     </div>
     <div class="btn-list">
       <a-button type="primary" @click="handleUpload" :disabled="isLoadingImg">确定</a-button>
       <a-button type="primary" @click="resetForm" style="margin-left: 15px;" :disabled="isLoadingImg">重置</a-button>
     </div>
+    <a-modal
+      title="新增批次"
+      :visible="addFloderVisible"
+      :width = '1000'
+      @cancel = "closeDialog"
+      @ok="handleAddFloderData"
+      :maskClosable='false'
+      style="top: 20px;"
+      :destroyOnClose="true"
+    >
+      <div class="dialog-content">
+        <p class="input-panel">
+          <label>名称：</label>
+          <a-input placeholder="请输入批次名称" v-model="dialogObj.name" style="width: 280px;" />
+        </p>
+        <div class="img-list">
+          <a-row :gutter="16">
+            <a-col :span="8" v-for="(item, index) in dialogObj.imgdata" :key="index">
+              <div class="img-item" style="text-align:center;">
+                <a-button class="del-btn" @click="handleDeleteDialogImg(item.id,item.type,indexs)" type="primary">
+                  <a-icon type="delete" />
+                </a-button>
+                <img :src="item.src" alt="" style="width: 200px;height:200px;">
+              </div>
+            </a-col>
+            <a-col :span="8">
+              <div class="upload-img-btn" style="margin-top: 45px;">
+                <a-upload
+                  listType="picture-card"
+                  class="avatar-uploader"
+                  :showUploadList="false"
+                  accept="image/*"
+                  :customRequest="addDialogImage"
+                >
+                  <div>
+                    <a-icon type="plus" style="font-size: 34px;" />
+                    <div class="ant-upload-text">上传</div>
+                  </div>
+                </a-upload>
+              </div>
+            </a-col>
+          </a-row>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -261,8 +321,8 @@
         zlfsData:[],//当前选中治疗方式
         allZljgData: [],//所有治疗结果数据
         zljgData: [],//当前选中治疗结果
-        patientName: '',//病人姓名
-        sex: 0, // 病人性别
+        patientName: '',//患者姓名
+        sex: 0, // 患者性别
         age: '',
         photoNum: '', // 联系方式
         ryDate: '', // 入院日期
@@ -270,14 +330,26 @@
         remarks: '', // 备注
         fileList: [],
         floderName: '',
-        patientId: '',//病人id
+        patientId: '',//患者id
         preImageData: [],//术前图片文件对象
         intraImageData: [],
         afterImageData: [],
+        preImageTabs : ['1'],
+        intraImageTabs : ['1'],
+        afterImageTabs : ['1'],
         allImageData: [],
         src: '',
         imgNumber: 0,
-        isLoadingImg: false
+        isLoadingImg: false,
+        addFloderVisible: false,
+        dialogObj: {
+          name: '',
+          imgdata: [],
+        },
+        preBath: '1',
+        intraBath: '1',
+        afterBath: '1',
+        activeType: '',
       };
     },
     mounted() {
@@ -291,7 +363,7 @@
       // 获取所有医生信息
       getCaseData() {
         const self = this;
-        self.$http.get('/doctor/all').then((res) => {
+        self.$http.get('/swing/doctor/all').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
@@ -306,7 +378,7 @@
       // 获取所有诊断数据
       getDiagnosisData() {
         const self = this;
-        this.$http.get('/dictionary/DIAGNOSIS_TYPE').then((res) => {
+        this.$http.get('/swing/dictionary/DIAGNOSIS_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allZdData = [];
@@ -321,7 +393,7 @@
       //获取所有手术方式数据
       getOperationData() {
         const self = this;
-        this.$http.get('/dictionary/OPERATION_NAME_TYPE').then((res) => {
+        this.$http.get('/swing/dictionary/OPERATION_NAME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allSsfsData = [];
@@ -336,7 +408,7 @@
       // 获取所有治疗方式数据
       getTreatmentMethodData() {
         const self = this;
-        this.$http.get('/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
+        this.$http.get('/swing/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allZlfsData = [];
@@ -351,7 +423,7 @@
       //获取所有治疗结果数据
       getTreatmentOutcomeData() {
         const self = this;
-        this.$http.get('/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
+        this.$http.get('/swing/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allZljgData = [];
@@ -373,6 +445,9 @@
           self.intraImageData = [];
           self.afterImageData = [];
           self.allImageData = [];
+          // self.preImageTabs = ['1'];
+          // self.intraImageTabs = ['1'];
+          // self.afterImageTabs = ['1'];
           self.floderName = file.webkitRelativePath.split('/')[0].split(conf.folderNameSeparator);
           self.patientId = self.floderName[0];
           self.floderName.forEach((item, index) => {
@@ -386,6 +461,7 @@
         const self = this;
         if(file.file.name.indexOf('DS_Store') === -1) {
           self.allImageData.push(file);
+          console.log(file.file.webkitRelativePath.split('/'));
         }
       },
       uploadAllImage () {
@@ -393,31 +469,53 @@
         self.isLoadingImg = true;
         self.allImageData.forEach(async (file) => {
           const subName = file.file.webkitRelativePath.split('/')[1];
+          const subfloderName = file.file.webkitRelativePath.split('/')[2];
           let type = '';
+          let bath = '';
           switch(subName) {
             case '术前':
               type = 'PRE_OPERATIVE_IMAGE_TYPE';
+              if (subfloderName.indexOf('.') === -1) {
+                bath = subfloderName;
+                if (self.preImageTabs.indexOf(subfloderName) === -1) {
+                  self.preImageTabs.push(subfloderName);
+                }
+              }
               break;
             case '术中':
               type = 'INTRA_OPERATIVE_IMAGE_TYPE';
+              if (subfloderName.indexOf('.') === -1) {
+                bath = subfloderName;
+                if (self.intraImageTabs.indexOf(subfloderName) === -1) {
+                  self.intraImageTabs.push(subfloderName);
+                }
+              }
               break;
             case '术后':
               type = 'POST_OPERATIVE_IMAGE_TYPE';
+              if (subfloderName.indexOf('.') === -1) {
+                bath = subfloderName;
+                if (self.afterImageTabs.indexOf(subfloderName) === -1) {
+                  self.afterImageTabs.push(subfloderName);
+                }
+              }
               break;
           }
           const formData = new FormData();
           formData.append('image', file.file);
           formData.append('type', type);
           formData.append('caseNo', self.patientId);
+          formData.append('bath', bath);
        
-          self.$http.post('/image', formData,)
+          self.$http.post('/swing/image', formData,)
           .then((res) => {
             const data = res.data;
             self.src = 'data:image/png;base64,' + data.image;
             const obj = {
               src: 'data:image/png;base64,' + data.image,
               type: data.imageType,
-              id: data.imageUid
+              id: data.imageUid,
+              bath: data.bath,
             };
             if(data.imageType === "intraOperative") {
               self.intraImageData.push(obj);
@@ -433,11 +531,12 @@
           });
         });
       },
-      //上传病人信息
+      //上传患者信息
       async uploadPatientName (floderName) {
         console.log(floderName);
         const self = this;
-        await self.$http.put('/patientcase/' + floderName)
+        const url = encodeURIComponent(floderName);
+        await self.$http.put('/swing/patientcase/' + url)
         .then(function(res) {
           if(res.status == 200) {
             self.floderName = '';
@@ -451,7 +550,7 @@
             // self.zdData.push(data.diagnosis);// 诊断
             // self.ssfsData = [];
             // self.ssfsData.push(data.operationName); // 手术方式
-            // 获取病人信息
+            // 获取患者信息
             self.getPatientInfo();
           }
         }).catch((err) => {
@@ -463,10 +562,10 @@
           }
         });
       },
-      // 获取病人信息
+      // 获取患者信息
       getPatientInfo() {
         const self = this;
-        self.$http.get('/patientcase/' + self.patientId).then((res) => {
+        self.$http.get('/swing/patientcase/' + self.patientId).then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.hospitalNum = data.caseNo;// 住院号
@@ -559,11 +658,11 @@
         //   return false;
         // }
         if(params.patientName === '') {
-          self.$message.error('请输入病人姓名');
+          self.$message.error('请输入患者姓名');
           return false;
         }
         // if(params.phoneNumber === '') {
-        //   self.$message.error('请输入病人联系电话');
+        //   self.$message.error('请输入患者联系电话');
         //   return false;
         // }
         // if(params.treatmentMethod.length === 0) {
@@ -574,7 +673,7 @@
         //   self.$message.error('请选择治疗结果');
         //   return false;
         // }
-        self.$http.post('/patientcase/addition', params)
+        self.$http.post('/swing/patientcase/addition', params)
         .then(() => {
           self.resetForm();
           self.$message.success('上传成功');
@@ -605,14 +704,16 @@
         formData.append('image', file.file);
         formData.append('type', 'PRE_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.patientId);
-        self.$http.post('/image', formData)
+        formData.append('bath', self.preBath);
+        self.$http.post('/swing/image', formData)
         .then((res) => {
           const data = res.data;
           self.src = 'data:image/png;base64,' + data.image;
           const obj = {
             src: 'data:image/png;base64,' + data.image,
             type: data.imageType,
-            id: data.imageUid
+            id: data.imageUid,
+            bath: data.bath,
           };
           self.preImageData.push(obj);
           self.isLoadingImg = false;
@@ -627,7 +728,8 @@
         formData.append('image', file.file);
         formData.append('type', 'INTRA_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.patientId);
-        self.$http.post('/image', formData)
+        formData.append('bath', self.intraBath);
+        self.$http.post('/swing/image', formData)
         .then((res) => {
           self.isLoadingImg = false;
           const data = res.data;
@@ -635,7 +737,8 @@
           const obj = {
             src: 'data:image/png;base64,' + data.image,
             type: data.imageType,
-            id: data.imageUid
+            id: data.imageUid,
+            bath: data.bath,
           };
           self.intraImageData.push(obj);
         }).catch((err) => {
@@ -649,7 +752,8 @@
         formData.append('image', file.file);
         formData.append('type', 'POST_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.patientId);
-        self.$http.post('/image', formData)
+        formData.append('bath', self.afterBath);
+        self.$http.post('/swing/image', formData)
         .then((res) => {
           self.isLoadingImg = false;
           const data = res.data;
@@ -657,7 +761,8 @@
           const obj = {
             src: 'data:image/png;base64,' + data.image,
             type: data.imageType,
-            id: data.imageUid
+            id: data.imageUid,
+            bath: data.bath,
           };
           self.afterImageData.push(obj);
 
@@ -673,7 +778,7 @@
         const params = {
           uuids: arr
         }
-        self.$http.post('/image/multipleDelete', params)
+        self.$http.post('/swing/image/multipleDelete', params)
         .then(() => {
           if(type === "intraOperative") {
             self.intraImageData.splice(index, 1);
@@ -696,8 +801,8 @@
         this.ssfsData =  [];//当前选中手术方式
         this.zlfsData = [];//当前选中治疗方式
         this.zljgData =  [];//当前选中治疗结果
-        this.patientName =  '';//病人姓名
-        this.sex =  0; // 病人性别
+        this.patientName =  '';//患者姓名
+        this.sex =  0; // 患者性别
         this.age =  '';
         this.photoNum =  ''; // 联系方式
         this.ryDate =  ''; // 入院日期
@@ -705,13 +810,107 @@
         this.remarks =  ''; // 备注
         this.fileList =  [];
         this.floderName =  '';
-        this.patientId =  '';//病人id
+        this.patientId =  '';//患者id
         this.preImageData =  [];//术前图片文件对象
         this.intraImageData =  [];
         this.afterImageData =  [];
         this.allImageData =  [];
         this.imgNumber =  0;
         this.isLoadingImg = false;
+        this.preImageTabs = ['1'];
+        this.intraImageTabs  = ['1'];
+        this.afterImageTabs  = ['1'];
+        this.dialogObj = {
+          name : '',
+          imgdata : [],
+        },
+        this.preBath = '1';
+        this.intraBath = '1';
+        this.afterBath = '1';
+      },
+      closeDialog() {
+        this.addFloderVisible = false;
+        this.dialogObj.name = '';
+        this.dialogObj.imgdata = [];
+      },
+      handleAddFloder(type) {
+        this.addFloderVisible = true;
+        this.activeType = type;
+      },
+      handleAddFloderData() {
+        const self = this;
+        if (self.dialogObj.name === '') {
+          this.$message.error('请输入新增批次名称');
+        } else if (self.dialogObj.imgdata.length === 0) {
+          this.$message.error('请上传图片');
+        } else {
+          if (self.activeType === 'PRE_OPERATIVE_IMAGE_TYPE') {
+            self.preImageTabs.push(self.dialogObj.name);
+            self.preBath = self.dialogObj.name;
+            self.preImageData = self.preImageData.concat(self.dialogObj.imgdata);
+          } else if (self.activeType === 'INTRA_OPERATIVE_IMAGE_TYPE') {
+            self.intraImageTabs.push(self.dialogObj.name);
+            self.intraBath = self.dialogObj.name;
+            self.intraImageData = self.intraImageData.concat(self.dialogObj.imgdata);
+          } else {
+            self.afterImageTabs.push(self.dialogObj.name);
+            self.afterBath = self.dialogObj.name;
+            self.afterImageData = self.afterImageData.concat(self.dialogObj.imgdata);
+          }
+          this.addFloderVisible = false;
+          self.dialogObj.name = '';
+          self.dialogObj.imgdata = [];
+        }
+      },
+      addDialogImage(file) {
+        const self = this;
+        const formData = new FormData();
+        // let bath = '';
+        // if (self.activeType === 'PRE_OPERATIVE_IMAGE_TYPE') {
+        //   bath = self.preBath;
+        // } else if (self.activeType === 'INTRA_OPERATIVE_IMAGE_TYPE') {
+        //   bath = self.intraBath;
+        // } else {
+        //   bath = self.afterBath;
+        // }
+        if (self.dialogObj.name === '') {
+          this.$message.error('请输入批次名称');
+        } else {
+          formData.append('image', file.file);
+          formData.append('type', self.activeType);
+          formData.append('caseNo', self.patientId);
+          formData.append('bath', self.dialogObj.name);
+          self.$http.post('/swing/image', formData)
+          .then((res) => {
+            const data = res.data;
+            self.src = 'data:image/png;base64,' + data.image;
+            const obj = {
+              src: 'data:image/png;base64,' + data.image,
+              type: data.imageType,
+              id: data.imageUid,
+              bath: data.bath
+            };
+            self.dialogObj.imgdata.push(obj);
+          }).catch((err) => {
+            console.log(err);
+          });
+        }
+      },
+      handleDeleteDialogImg(uuid, type, index) {
+        const self = this;
+        let arr = [];
+        arr[0] = uuid;
+        const params = {
+          uuids: arr
+        }
+        self.$http.post('/swing/image/multipleDelete', params)
+        .then(() => {
+          self.dialogObj.imgdata.splice(index, 1);
+          self.$message.success('删除成功');
+        }).catch((err) => {
+          console.log(err);
+          self.$message.error('删除失败');
+        });
       }
     },
   };
@@ -730,7 +929,6 @@
   .photo-box {
     .photo-item {
       .ant-upload {
-        margin-top: 45px;
         .anticon-plus{
           font-size: 36px;
         }
@@ -739,6 +937,33 @@
   }
 </style>
 <style lang="scss" scoped>
+.dialog-content {
+  .img-list {
+    .img-item {
+      text-align: center;
+      img {
+        width: 200px;
+        height: 200px;
+      }
+      &:hover {
+        .del-btn {
+          display: block;
+        }
+      }
+      .del-btn {
+        position: absolute;
+        top: 10px;
+        right: 70px;
+        display: none;
+        width: 20px !important;
+        .anticon{
+          position: relative;
+          left: -7px;
+        }
+      }
+    }
+  }
+}
 .patient-content {
   padding-bottom: 20px;
   .head-title {
@@ -797,10 +1022,11 @@
       }
     }
     .photo-item {
-      padding-left: 202px;
+      padding-left:100px;
       min-height: 200px;
       margin-top: 15px;
       overflow: hidden;
+      position: relative;
       label {
         width: 100px;
         display: block;
@@ -809,13 +1035,13 @@
         float: left;
         position: relative;
         top: 80px;
-        left: -110px;
+        left: 0;
       }
       .upload-img-btn {
         float: left;
         width: 102px;
-        height: 102px;
-        margin-left: -102px;
+        height: 104px;
+        margin-top: 45px;
       }
       .items-list {
         float: left;
@@ -847,6 +1073,13 @@
           }
         }
       }
+      .add-floder {
+        position: absolute;
+        right: 25px;
+        top: 5px;
+        cursor: pointer;
+        z-index: 10;
+      }
     }
   }
   .btn-list {
@@ -857,5 +1090,4 @@
     }
   }
 }
-
 </style>

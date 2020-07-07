@@ -33,10 +33,13 @@ module.exports = {
     https: false, // https:{type:Boolean}
     open: true, //配置自动启动浏览器
     proxy: {
-      '/': {
+      '/swing': {
         // 目标 API 地址
         target: 'http://148.70.72.99:8080/swing',
-        changeOrigin: true
+        changeOrigin: true,
+        pathRewrite: {
+          '^/swing': '/'
+        }
       }
     }
   },

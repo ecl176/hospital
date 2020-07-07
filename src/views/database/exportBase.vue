@@ -116,7 +116,7 @@ import { downloadFileFromResource } from '@/utils/file'
         const formData = new FormData();
         formData.append('dataFile', file.file);
         self.dataIsLoading = true;
-        self.$http.post('/database/import/data', formData)
+        self.$http.post('/swing/database/import/data', formData)
         .then((res) => {
           const data = res.data;
           self.exportFileInfo = data.importInfo;
@@ -143,7 +143,7 @@ import { downloadFileFromResource } from '@/utils/file'
           self.formDatasNum = 0;
           self.photoIsLoading = true;
           const params = self.allImageData;
-          self.$http.post('/database/import/image', params, {
+          self.$http.post('/swing/database/import/image', params, {
             headers: {
               'Content-Type':'multipart/form-data'
             }
@@ -169,7 +169,7 @@ import { downloadFileFromResource } from '@/utils/file'
           "truncateDatabase": true
         };
         self.exportIsLoading = true;
-        self.$http.post('/database/export', params, {
+        self.$http.post('/swing/database/export', params, {
           responseType: 'blob'
         })
         .then((res) => {
@@ -189,7 +189,7 @@ import { downloadFileFromResource } from '@/utils/file'
             "truncateDatabase": false
           };
           self.exportIsLoading = true;
-          self.$http.post('/database/export', params, {
+          self.$http.post('/swing/database/export', params, {
             responseType: 'blob'
           })
           .then((res) => {

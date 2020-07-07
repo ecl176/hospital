@@ -66,7 +66,7 @@
       //获取职称信息
       getCaseData() {
         const self = this;
-        self.$http.get('/dictionary/TITLE_TYPE').then((res) => {
+        self.$http.get('/swing/dictionary/TITLE_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
@@ -103,7 +103,7 @@
           self.$message.error('请选择医生职称');
           return false;
         }
-        self.$http.post('/doctor/addition', params)
+        self.$http.post('/swing/doctor/addition', params)
         .then(() => {
           self.$message.success('添加成功');
           self.resetForm();

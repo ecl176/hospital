@@ -9,9 +9,9 @@
       >
         <a-sub-menu key="sub1">
           <span slot="title">
-          <a-icon type="mail" /><span>病人信息管理</span></span>
-          <a-menu-item key="addpatient">病人信息登记</a-menu-item>
-          <a-menu-item key="searchpatient">病人信息查询</a-menu-item>
+          <a-icon type="mail" /><span>患者信息管理</span></span>
+          <a-menu-item key="addpatient">患者信息登记</a-menu-item>
+          <a-menu-item key="searchpatient">患者信息查询</a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="sub2">
           <span slot="title"><a-icon type="calendar" /><span>医生信息管理</span></span>

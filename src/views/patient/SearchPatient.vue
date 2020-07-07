@@ -1,7 +1,7 @@
 <template>
   <div class='patient-content'>
     <p class="head-title">
-      <span>病人信息查询</span>
+      <span>患者信息查询</span>
     </p>
     <div class="form-box">
       <a-row :gutter="16">
@@ -23,8 +23,8 @@
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">病人姓名</label>
-            <a-input placeholder="请输入病人姓名" v-model='searchObj.patientName' />
+            <label class="label">患者姓名</label>
+            <a-input placeholder="请输入患者姓名" v-model='searchObj.patientName' />
           </div>
         </a-col>
       </a-row>
@@ -40,14 +40,14 @@
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">病人起始年龄</label>
-            <a-input placeholder="请输入病人年龄" v-model='searchObj.startage' type="number"/>
+            <label class="label">患者起始年龄</label>
+            <a-input placeholder="请输入患者年龄" v-model='searchObj.startage' type="number"/>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">病人终止年龄</label>
-            <a-input placeholder="请输入病人年龄" v-model='searchObj.endage' type="number"/>
+            <label class="label">患者终止年龄</label>
+            <a-input placeholder="请输入患者年龄" v-model='searchObj.endage' type="number"/>
           </div>
         </a-col>
       </a-row>
@@ -179,9 +179,9 @@
         <tr>
           <th>住院号</th>
           <th>入院日期</th>
-          <th>病人姓名</th>
-          <th>病人年龄</th>
-          <th>病人性别</th>
+          <th>患者姓名</th>
+          <th>患者年龄</th>
+          <th>患者性别</th>
           <th>联系电话</th>
           <th>主治医生</th>
           <th>诊断部位</th>
@@ -227,7 +227,7 @@
       <div :class="{ active: printIsShow }"></div>
     </div>
     <a-modal
-      title="查看病人信息"
+      title="查看患者信息"
       :visible="checkPatientInfoVisible"
       :footer="null"
       :width = '1000'
@@ -245,7 +245,7 @@
           <td>{{checkObj.diagnosis}}</td>
         </tr>
         <tr>
-          <td>病人姓名</td>
+          <td>患者姓名</td>
           <td>{{checkObj.patientName}}</td>
           <td>性别</td>
           <td>{{checkObj.patientGender}}</td>
@@ -298,7 +298,7 @@
       @ok="handleDelInfo"
       @cancel="handleCloseDelModatl"
       >
-      <p style="text-align:center;font-size:16px;margin: 10px 0 0">确定删除当前病人信息吗</p>
+      <p style="text-align:center;font-size:16px;margin: 10px 0 0">确定删除当前患者信息吗</p>
     </a-modal>
     <a-modal
       v-model="delMulModalVisible"
@@ -306,11 +306,11 @@
       @ok="handleMulDelInfo"
       @cancel="handleCloseDelMulModatl"
       >
-      <p style="text-align:center;font-size:16px;margin: 10px 0 0">确定删除所选病人信息吗</p>
+      <p style="text-align:center;font-size:16px;margin: 10px 0 0">确定删除所选患者信息吗</p>
     </a-modal>
     <a-modal
       v-model="editModalVisible"
-      title="编辑病人信息"
+      title="编辑患者信息"
       @ok="handleEditInfo"
       @cancel="handleCloseEditModal"
       :width = '1000'
@@ -338,8 +338,8 @@
             </a-col>
             <a-col class="gutter-row" :span="8">
               <div class="gutter-box">
-                <label class="label">病人姓名</label>
-                <a-input placeholder="请输入病人姓名" v-model='editObj.patientName' />
+                <label class="label">患者姓名</label>
+                <a-input placeholder="请输入患者姓名" v-model='editObj.patientName' />
               </div>
             </a-col>
           </a-row>
@@ -355,8 +355,8 @@
             </a-col>
             <a-col class="gutter-row" :span="8">
               <div class="gutter-box">
-                <label class="label">病人年龄</label>
-                <a-input placeholder="请输入病人年龄" v-model='editObj.age' type="number"/>
+                <label class="label">患者年龄</label>
+                <a-input placeholder="请输入患者年龄" v-model='editObj.age' type="number"/>
               </div>
             </a-col>
             <a-col class="gutter-row" :span="8">
@@ -555,17 +555,17 @@ import { downloadFileFromResource } from '@/utils/file'
       align: 'center'
     },
     {
-      title: '病人姓名',
+      title: '患者姓名',
       dataIndex: 'patientName',
       align: 'center'
     },
     {
-      title: '病人年龄',
+      title: '患者年龄',
       dataIndex: 'patientAge',
       align: 'center'
     },
     {
-      title: '病人性别',
+      title: '患者性别',
       dataIndex: 'patientGender',
       align: 'center'
     },
@@ -614,7 +614,7 @@ import { downloadFileFromResource } from '@/utils/file'
         isExporting: false,
         printObj: {
           id: 'printMe',
-          popTitle: '病人信息打印'
+          popTitle: '患者信息打印'
         },
         printIsShow: false,
         currentCaseId: '',
@@ -631,17 +631,17 @@ import { downloadFileFromResource } from '@/utils/file'
         columns: columns, // 表格头
         tableData: [], // 表格数据
         printData: [], // 打印数据
-        checkPatientInfoVisible: false, //查看病人信息弹窗
-        checkPreImageData:[],//弹窗病人术前照片
-        checkIntraImageData:[],//弹窗病人术中照片
-        checkAfterImageData:[],//弹窗病人术后照片
+        checkPatientInfoVisible: false, //查看患者信息弹窗
+        checkPreImageData:[],//弹窗患者术前照片
+        checkIntraImageData:[],//弹窗患者术中照片
+        checkAfterImageData:[],//弹窗患者术后照片
         delModalVisible: false,
         editModalVisible: false,
         delMulModalVisible: false,
         searchObj: {
           hospitalNum:'',
           currentCaseName:[],//主治医师
-          patientName: '',// 病人姓名
+          patientName: '',// 患者姓名
           startage:'',
           endage: '',
           zdData:[],//诊断部位
@@ -666,8 +666,8 @@ import { downloadFileFromResource } from '@/utils/file'
           ssfsData: [],//当前选中手术方式
           zlfsData:[],//当前选中治疗方式
           zljgData: [],//当前选中治疗结果
-          patientName: '',//病人姓名
-          sex: 0, // 病人性别
+          patientName: '',//患者姓名
+          sex: 0, // 患者性别
           age: '',
           photoNum: '', // 联系方式
           ryDate: '', // 入院日期
@@ -698,7 +698,7 @@ import { downloadFileFromResource } from '@/utils/file'
       // 获取所有医生信息
       getCaseData() {
         const self = this;
-        self.$http.get('/doctor/all').then((res) => {
+        self.$http.get('/swing/doctor/all').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
@@ -713,7 +713,7 @@ import { downloadFileFromResource } from '@/utils/file'
       // 获取所有诊断数据
       getDiagnosisData() {
         const self = this;
-        this.$http.get('/dictionary/DIAGNOSIS_TYPE').then((res) => {
+        this.$http.get('/swing/dictionary/DIAGNOSIS_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allZdData = [];
@@ -728,7 +728,7 @@ import { downloadFileFromResource } from '@/utils/file'
       //获取所有手术方式数据
       getOperationData() {
         const self = this;
-        this.$http.get('/dictionary/OPERATION_NAME_TYPE').then((res) => {
+        this.$http.get('/swing/dictionary/OPERATION_NAME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allSsfsData = [];
@@ -743,7 +743,7 @@ import { downloadFileFromResource } from '@/utils/file'
       // 获取所有治疗方式数据
       getTreatmentMethodData() {
         const self = this;
-        this.$http.get('/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
+        this.$http.get('/swing/dictionary/TREATMENT_METHOD_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allZlfsData = [];
@@ -758,7 +758,7 @@ import { downloadFileFromResource } from '@/utils/file'
       //获取所有治疗结果数据
       getTreatmentOutcomeData() {
         const self = this;
-        this.$http.get('/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
+        this.$http.get('/swing/dictionary/TREATMENT_OUTCOME_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             self.allZljgData = [];
@@ -833,7 +833,7 @@ import { downloadFileFromResource } from '@/utils/file'
           searchParams.patientGender = '';
         }
         const pageNo = self.pager.pageNo - 1;
-        const url = '/patientcase?page='+ pageNo +'&size='+ self.pager.pageSize +'&sort=caseNo,desc';
+        const url = '/swing/patientcase?page='+ pageNo +'&size='+ self.pager.pageSize +'&sort=caseNo,desc';
         self.$http.post(url, searchParams)
         .then((res) => {
           const data = res.data.list;
@@ -962,7 +962,7 @@ import { downloadFileFromResource } from '@/utils/file'
         self.editObj.intraImageData = [];
         self.editObj.afterImageData = [];
         self.isLoadingImg = true;
-        self.$http.get('/image/' + caseNo)
+        self.$http.get('/swing/image/' + caseNo)
         .then((res) => {
           const data = res.data;
           data.preOperativeImageList.forEach((item) => {
@@ -1005,7 +1005,7 @@ import { downloadFileFromResource } from '@/utils/file'
         formData.append('image', file.file);
         formData.append('type', 'PRE_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.editObj.hospitalNum);
-        self.$http.post('/image', formData)
+        self.$http.post('/swing/image', formData)
         .then((res) => {
           const data = res.data;
           self.src = 'data:image/png;base64,' + data.image;
@@ -1027,7 +1027,7 @@ import { downloadFileFromResource } from '@/utils/file'
         formData.append('image', file.file);
         formData.append('type', 'INTRA_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.editObj.hospitalNum);
-        self.$http.post('/image', formData)
+        self.$http.post('/swing/image', formData)
         .then((res) => {
           self.editObj.isLoadingImg = false;
           const data = res.data;
@@ -1049,7 +1049,7 @@ import { downloadFileFromResource } from '@/utils/file'
         formData.append('image', file.file);
         formData.append('type', 'POST_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.editObj.hospitalNum);
-        self.$http.post('/image', formData)
+        self.$http.post('/swing/image', formData)
         .then((res) => {
           self.editObj.isLoadingImg = false;
           const data = res.data;
@@ -1073,7 +1073,7 @@ import { downloadFileFromResource } from '@/utils/file'
         const params = {
           uuids: arr
         }
-        self.$http.post('/image/multipleDelete', params)
+        self.$http.post('/swing/image/multipleDelete', params)
         .then(() => {
           if(type === "intraOperative") {
             self.editObj.intraImageData.splice(index, 1);
@@ -1088,18 +1088,18 @@ import { downloadFileFromResource } from '@/utils/file'
           self.$message.error('删除失败');
         });
       },
-      // 查看病人信息 关闭弹窗
+      // 查看患者信息 关闭弹窗
       closeInfoModal: function() {
         this.checkPatientInfoVisible = false;
       },
-      // 删除病人信息 弹窗关闭
+      // 删除患者信息 弹窗关闭
       handleDelInfo: function() {
         const self = this;
         self.delModalVisible = false;
         const params = {
           patientCaseNo: [self.currentCaseId]
         };
-        self.$http.post('/patientcase/multipleDelete', params)
+        self.$http.post('/swing/patientcase/multipleDelete', params)
         .then(() => {
           // self.tableData.splice(self.currentIndex, 1);
           self.handleSearch();
@@ -1111,7 +1111,7 @@ import { downloadFileFromResource } from '@/utils/file'
       handleCloseDelModatl: function() {
         this.delModalVisible = false;
       },
-      // 编辑病人信息 确认按钮点击
+      // 编辑患者信息 确认按钮点击
       handleEditInfo: function() {
         const self = this;
         if(self.editObj.isLoadingImg || self.isLoadingImg) {
@@ -1133,7 +1133,7 @@ import { downloadFileFromResource } from '@/utils/file'
           "treatmentOutcome": self.editObj.zljgData,
           "caseComment": self.editObj.remarks
         };
-        self.$http.post('/patientcase/addition', params)
+        self.$http.post('/swing/patientcase/addition', params)
         .then(() => {
           self.$message.success('编辑成功');
           window.scrollTo(0, 0);
@@ -1185,7 +1185,7 @@ import { downloadFileFromResource } from '@/utils/file'
             if(self.searchObj.sex === 3) {
               params.patientGender = '';
             }
-            self.$http.post('/patientcaserecord', params, {
+            self.$http.post('/swing/patientcaserecord', params, {
               responseType: 'blob'
             }).then((res) => {
               self.isExporting = false;
@@ -1196,10 +1196,9 @@ import { downloadFileFromResource } from '@/utils/file'
             });
           } else {
             const params = self.allCurrentCaseId;
-            self.$http.post('/patientcaserecord/caseNos', params, {
+            self.$http.post('/swing/patientcaserecord/caseNos', params, {
               responseType: 'blob'
             }).then((res) => {
-              debugger;
               self.isExporting = false;
               downloadFileFromResource(res);
             }).catch(() => {
@@ -1220,7 +1219,7 @@ import { downloadFileFromResource } from '@/utils/file'
         const params = {
           patientCaseNo: self.allCurrentCaseId
         };
-        self.$http.post('/patientcase/multipleDelete', params)
+        self.$http.post('/swing/patientcase/multipleDelete', params)
         .then(() => {
           self.$message.success('删除成功');
           self.handleSearch();
@@ -1248,7 +1247,7 @@ import { downloadFileFromResource } from '@/utils/file'
         this.searchObj = {
           hospitalNum:'',
           currentCaseName:[],//主治医师
-          patientName: '',// 病人姓名
+          patientName: '',// 患者姓名
           startage:'',
           endage: '',
           zdData:[],//诊断部位

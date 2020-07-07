@@ -171,7 +171,7 @@
       return {
         allCaseData: [],//所有医生信息
         currentCaseName: [], // 默认医生信息
-        caseName: '',//病人姓名
+        caseName: '',//患者姓名
         sex: 3,
         columns: columns, // 表格头
         tableData: [], // 表格数据
@@ -182,7 +182,7 @@
         allCurrentCaseId: [],
         editObj: {
           currentCaseName: [], // 默认职称
-          caseName: '',//病人姓名
+          caseName: '',//患者姓名
           sex: 0,
           remark: '',
           id: ''
@@ -204,7 +204,7 @@
       //获取职称信息
       getCaseData() {
         const self = this;
-        self.$http.get('/dictionary/TITLE_TYPE').then((res) => {
+        self.$http.get('/swing/dictionary/TITLE_TYPE').then((res) => {
           if(res.status === 200) {
             const data = res.data;
             data.forEach((item) => {
@@ -232,7 +232,7 @@
           params.doctorGender = '';
         }
         const pageNo = self.pager.pageNo - 1;
-        const url = '/doctor?page='+ pageNo +'&size='+ self.pager.pageSize;
+        const url = '/swing/doctor?page='+ pageNo +'&size='+ self.pager.pageSize;
         self.$http.post(url, params)
         .then((res) => {
           const data = res.data.list;
@@ -270,7 +270,7 @@
           titleType: ''
         };
         const pageNo = self.pager.pageNo - 1;
-        const url = '/doctor?page='+ pageNo +'&size='+ self.pager.pageSize;
+        const url = '/swing/doctor?page='+ pageNo +'&size='+ self.pager.pageSize;
         self.$http.post(url, params)
         .then((res) => {
           const data = res.data.list;
@@ -310,7 +310,7 @@
         const params = {
           doctorIds: self.currentCaseId
         };
-        self.$http.post('/doctor/multipleDelete', params)
+        self.$http.post('/swing/doctor/multipleDelete', params)
         .then(() => {
           // self.tableData.splice(self.currentIndex, 1);
           self.handleSearch();
@@ -349,7 +349,7 @@
         const params = {
           doctorIds: self.allCurrentCaseId
         };
-        self.$http.post('/doctor/multipleDelete', params)
+        self.$http.post('/swing/doctor/multipleDelete', params)
         .then(() => {
           // self.tableData.splice(self.currentIndex, 1);
           self.handleSearch();
@@ -384,7 +384,7 @@
           self.$message.error('请选择医生职称');
           return false;
         }
-        self.$http.post('/doctor/addition', params)
+        self.$http.post('/swing/doctor/addition', params)
         .then(() => {
           self.$message.success('修改成功');
           self.editCaseInfoVisible = false;
