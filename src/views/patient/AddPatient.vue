@@ -278,7 +278,7 @@
               </div>
             </a-col>
             <a-col :span="8">
-              <div class="upload-img-btn" style="margin-top: 45px;">
+              <div class="upload-img-btn" style="margin-top: 45px;margin-left: 40px;">
                 <a-upload
                   listType="picture-card"
                   class="avatar-uploader"
@@ -938,6 +938,10 @@
 </style>
 <style lang="scss" scoped>
 .dialog-content {
+  .input-panel {
+    padding-left: 40px;
+    margin-bottom: 16px;
+  }
   .img-list {
     .img-item {
       text-align: center;

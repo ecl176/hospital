@@ -274,21 +274,33 @@
         </div>
         <div class="photo-item">
           <label>术前</label>
-          <div class="items-list" v-for="(item) in checkPreImageData" :key="item.id">
-            <img :src="item.src" alt="">
-          </div>
+          <a-tabs defaultActiveKey='1'>
+            <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+              <div class="items-list" v-for="(item) in checkPreImageData" :key="item.id" v-show="item.bath === items">
+                <img :src="item.src" alt="" >
+              </div>
+            </a-tab-pane>
+          </a-tabs>
         </div>
         <div class="photo-item">
           <label>术中</label>
-          <div class="items-list" v-for="(item) in checkIntraImageData" :key="item.id">
-            <img :src="item.src" alt="">
-          </div>
+          <a-tabs defaultActiveKey='1'>
+            <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+              <div class="items-list" v-for="(item) in checkIntraImageData" :key="item.id" v-show="item.bath === items">
+                <img :src="item.src" alt="" >
+              </div>
+            </a-tab-pane>
+          </a-tabs>
         </div>
         <div class="photo-item">
           <label>术后</label>
-          <div class="items-list" v-for="(item) in checkAfterImageData" :key="item.id">
-            <img :src="item.src" alt="">
-          </div>
+          <a-tabs defaultActiveKey='1'>
+            <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+              <div class="items-list" v-for="(item) in checkAfterImageData" :key="item.id" v-show="item.bath === items">
+                <img :src="item.src" alt="" >
+              </div>
+            </a-tab-pane>
+          </a-tabs>
         </div>
       </div>
     </a-modal>
@@ -538,6 +550,51 @@
         </div>
       </div>
     </a-modal>
+    <a-modal
+      title="新增批次"
+      :visible="addFloderVisible"
+      :width = '1000'
+      @cancel = "closeDialog"
+      @ok="handleAddFloderData"
+      :maskClosable='false'
+      style="top: 20px;"
+      :destroyOnClose="true"
+    >
+      <div class="dialog-content">
+        <p class="input-panel">
+          <label>名称：</label>
+          <a-input placeholder="请输入批次名称" v-model="dialogObj.name" style="width: 280px;" />
+        </p>
+        <div class="img-list">
+          <a-row :gutter="16">
+            <a-col :span="8" v-for="(item, index) in dialogObj.imgdata" :key="index">
+              <div class="img-item" style="text-align:center;">
+                <a-button class="del-btn" @click="handleDeleteDialogImg(item.id,item.type,indexs)" type="primary">
+                  <a-icon type="delete" />
+                </a-button>
+                <img :src="item.src" alt="" style="width: 200px;height:200px;">
+              </div>
+            </a-col>
+            <a-col :span="8">
+              <div class="upload-img-btn" style="margin-top: 45px;margin-left: 40px;">
+                <a-upload
+                  listType="picture-card"
+                  class="avatar-uploader"
+                  :showUploadList="false"
+                  accept="image/*"
+                  :customRequest="addDialogImage"
+                >
+                  <div>
+                    <a-icon type="plus" style="font-size: 34px;" />
+                    <div class="ant-upload-text">上传</div>
+                  </div>
+                </a-upload>
+              </div>
+            </a-col>
+          </a-row>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -683,7 +740,16 @@ import { downloadFileFromResource } from '@/utils/file'
           pageNo: 1,
           pageSize: 20,
           total: 0
-        }
+        },
+        preImageTabs: ['1'],
+        intraImageTabs: ['1'],
+        afterImageTabs: ['1'],
+        addFloderVisible: false,
+        dialogObj: {
+          name: '',
+          imgdata: [],
+        },
+        activeType: '',
       };
     },
     mounted() {
@@ -966,31 +1032,69 @@ import { downloadFileFromResource } from '@/utils/file'
         .then((res) => {
           const data = res.data;
           data.preOperativeImageList.forEach((item) => {
-            const obj = {
-              src: 'data:image/png;base64,' + item.image,
-              type: item.imageType,
-              id: item.imageUid
-            };
-            self.checkPreImageData.push(obj);
-            self.editObj.preImageData.push(obj);
+            if (item.imageItems) {
+              item.imageItems.forEach((list) => {
+                const obj = {
+                  src: 'data:image/png;base64,' + list.image,
+                  type: list.imageType,
+                  id: list.imageUid,
+                  bath: item.bath,
+                };
+                self.checkPreImageData.push(obj);
+                self.editObj.preImageData.push(obj);
+              });
+              if(self.preImageTabs.indexOf(item.bath) === -1) {
+                self.preImageTabs.push(item.bath);
+              }
+            }
           });
           data.intraOperativeImageList.forEach((item) => {
-            const obj = {
-              src: 'data:image/png;base64,' + item.image,
-              type: item.imageType,
-              id: item.imageUid
-            };
-            self.checkIntraImageData.push(obj);
-            self.editObj.intraImageData.push(obj);
+            // const obj = {
+            //   src: 'data:image/png;base64,' + item.image,
+            //   type: item.imageType,
+            //   id: item.imageUid
+            // };
+            // self.checkIntraImageData.push(obj);
+            // self.editObj.intraImageData.push(obj);
+            if (item.imageItems) {
+              item.imageItems.forEach((list) => {
+                const obj = {
+                  src: 'data:image/png;base64,' + list.image,
+                  type: list.imageType,
+                  id: list.imageUid,
+                  bath: item.bath,
+                };
+                self.checkIntraImageData.push(obj);
+                self.editObj.intraImageData.push(obj);
+              });
+              if(self.intraImageTabs.indexOf(item.bath) === -1) {
+                self.intraImageTabs.push(item.bath);
+              }
+            }
           });
           data.postOperativeImageList.forEach((item) => {
-            const obj = {
-              src: 'data:image/png;base64,' + item.image,
-              type: item.imageType,
-              id: item.imageUid
-            };
-            self.checkAfterImageData.push(obj);
-            self.editObj.afterImageData.push(obj);
+            // const obj = {
+            //   src: 'data:image/png;base64,' + item.image,
+            //   type: item.imageType,
+            //   id: item.imageUid
+            // };
+            // self.checkAfterImageData.push(obj);
+            // self.editObj.afterImageData.push(obj);
+            if (item.imageItems) {
+              item.imageItems.forEach((list) => {
+                const obj = {
+                  src: 'data:image/png;base64,' + list.image,
+                  type: list.imageType,
+                  id: list.imageUid,
+                  bath: item.bath,
+                };
+                self.checkAfterImageData.push(obj);
+                self.editObj.afterImageData.push(obj);
+              });
+              if(self.afterImageTabs.indexOf(item.bath) === -1) {
+                self.afterImageTabs.push(item.bath);
+              }
+            }
           });
           self.isLoadingImg = false;
         }).catch(() => {
@@ -1091,6 +1195,9 @@ import { downloadFileFromResource } from '@/utils/file'
       // 查看患者信息 关闭弹窗
       closeInfoModal: function() {
         this.checkPatientInfoVisible = false;
+        this.preImageTabs = ['1'];
+        this.intraImageTabs = ['1'];
+        this.afterImageTabs = ['1'];
       },
       // 删除患者信息 弹窗关闭
       handleDelInfo: function() {
@@ -1269,7 +1376,16 @@ import { downloadFileFromResource } from '@/utils/file'
         setTimeout(() => {
           this.printIsShow = false;
         }, 0);
-      }
+      },
+      closeDialog() {
+        this.addFloderVisible = false;
+        this.dialogObj.name = '';
+        this.dialogObj.imgdata = [];
+      },
+      handleAddFloder(type) {
+        this.addFloderVisible = true;
+        this.activeType = type;
+      },
     },
     computed: {
       rowSelection() {
@@ -1477,6 +1593,7 @@ import { downloadFileFromResource } from '@/utils/file'
           width: 102px;
           height: 102px;
           margin-left: -102px;
+          margin-top: 45px;
         }
         .items-list {
           float: left;
