@@ -455,9 +455,9 @@
           // self.afterImageTabs = ['1'];
           self.floderName = file.webkitRelativePath.split('/')[0].split(conf.folderNameSeparator);
           self.patientId = self.floderName[0];
-          self.floderName.forEach((item, index) => {
-            self.floderName[index] = item.trim().replace('岁','');
-          });
+          // self.floderName.forEach((item, index) => {
+          //   self.floderName[index] = item.trim().replace('岁','');
+          // });
           self.floderName = self.floderName.join(conf.folderNameSeparator);
           self.uploadPatientName(self.floderName);
         }
