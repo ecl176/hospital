@@ -195,7 +195,7 @@
         <label>术中</label>
         <a-button type="primary" class="add-floder" @click="handleAddFloder('INTRA_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
         <a-tabs v-model="intraBath" @change="callback" v-show="intraImageTabs.length > 0">
-          <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+          <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items">
             <div class="upload-img-btn">
               <a-upload
                 listType="picture-card"
@@ -223,7 +223,7 @@
         <label>术后</label>
         <a-button type="primary" class="add-floder" @click="handleAddFloder('POST_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
         <a-tabs v-model="afterBath" defaultActiveKey="1" v-show="afterImageTabs.length > 0">
-          <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+          <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items">
             <div class="upload-img-btn">
               <a-upload
                 listType="picture-card"
