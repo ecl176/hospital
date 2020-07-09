@@ -274,7 +274,7 @@
         </div>
         <div class="photo-item">
           <label>术前</label>
-          <a-tabs defaultActiveKey='1'>
+          <a-tabs defaultActiveKey='根目录'>
             <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items">
               <div class="items-list" v-for="(item) in checkPreImageData" :key="item.id" v-show="item.bath === items">
                 <img :src="item.src" alt="" >
@@ -284,7 +284,7 @@
         </div>
         <div class="photo-item">
           <label>术中</label>
-          <a-tabs defaultActiveKey='1'>
+          <a-tabs defaultActiveKey='根目录'>
             <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items">
               <div class="items-list" v-for="(item) in checkIntraImageData" :key="item.id" v-show="item.bath === items">
                 <img :src="item.src" alt="" >
@@ -294,7 +294,7 @@
         </div>
         <div class="photo-item">
           <label>术后</label>
-          <a-tabs defaultActiveKey='1'>
+          <a-tabs defaultActiveKey='根目录'>
             <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items">
               <div class="items-list" v-for="(item) in checkAfterImageData" :key="item.id" v-show="item.bath === items">
                 <img :src="item.src" alt="" >
@@ -821,18 +821,18 @@ import { downloadFileFromResource } from '@/utils/file'
           pageSize: 20,
           total: 0
         },
-        preImageTabs: ['1'],
-        intraImageTabs: ['1'],
-        afterImageTabs: ['1'],
+        preImageTabs: ['根目录'],
+        intraImageTabs: ['根目录'],
+        afterImageTabs: ['根目录'],
         addFloderVisible: false,
         dialogObj: {
           name: '',
           imgdata: [],
         },
         activeType: '',
-        preBath: '1',
-        intraBath: '1',
-        afterBath: '1',
+        preBath: '根目录',
+        intraBath: '根目录',
+        afterBath: '根目录',
         dialogLoading: false,
         patientId: '',
       };
@@ -1287,12 +1287,12 @@ import { downloadFileFromResource } from '@/utils/file'
       // 查看患者信息 关闭弹窗
       closeInfoModal: function() {
         this.checkPatientInfoVisible = false;
-        this.preImageTabs = ['1'];
-        this.intraImageTabs = ['1'];
-        this.afterImageTabs = ['1'];
-        this.preBath = '1';
-        this.intraBath = '1';
-        this.afterBath = '1';
+        this.preImageTabs = ['根目录'];
+        this.intraImageTabs = ['根目录'];
+        this.afterImageTabs = ['根目录'];
+        this.preBath = '根目录';
+        this.intraBath = '根目录';
+        this.afterBath = '根目录';
       },
       // 删除患者信息 弹窗关闭
       handleDelInfo: function() {
@@ -1362,12 +1362,12 @@ import { downloadFileFromResource } from '@/utils/file'
       },
       handleCloseEditModal: function() {
         this.editModalVisible = false;
-        this.preImageTabs = ['1'];
-        this.intraImageTabs = ['1'];
-        this.afterImageTabs = ['1'];
-        this.preBath = '1';
-        this.intraBath = '1';
-        this.afterBath = '1';
+        this.preImageTabs = ['根目录'];
+        this.intraImageTabs = ['根目录'];
+        this.afterImageTabs = ['根目录'];
+        this.preBath = '根目录';
+        this.intraBath = '根目录';
+        this.afterBath = '根目录';
       },
       // 处理导出
       handleExport() {

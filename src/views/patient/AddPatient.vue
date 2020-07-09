@@ -166,7 +166,7 @@
       <div class="photo-item">
         <label>术前</label>
         <a-button type="primary" @click="handleAddFloder('PRE_OPERATIVE_IMAGE_TYPE')" class="add-floder">新增批次</a-button>
-        <a-tabs v-model="preBath" v-show="preImageTabs.length > 0">
+        <a-tabs v-model="preBath" defaultActiveKey="根目录" v-show="preImageTabs.length > 0">
           <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items">
             <div class="upload-img-btn">
               <a-upload
@@ -194,7 +194,7 @@
       <div class="photo-item">
         <label>术中</label>
         <a-button type="primary" class="add-floder" @click="handleAddFloder('INTRA_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
-        <a-tabs v-model="intraBath" @change="callback" v-show="intraImageTabs.length > 0">
+        <a-tabs v-model="intraBath" defaultActiveKey="根目录" @change="callback" v-show="intraImageTabs.length > 0">
           <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items">
             <div class="upload-img-btn">
               <a-upload
@@ -222,7 +222,7 @@
       <div class="photo-item">
         <label>术后</label>
         <a-button type="primary" class="add-floder" @click="handleAddFloder('POST_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
-        <a-tabs v-model="afterBath" defaultActiveKey="1" v-show="afterImageTabs.length > 0">
+        <a-tabs v-model="afterBath" defaultActiveKey="根目录" v-show="afterImageTabs.length > 0">
           <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items">
             <div class="upload-img-btn">
               <a-upload
@@ -338,9 +338,9 @@
         preImageData: [],//术前图片文件对象
         intraImageData: [],
         afterImageData: [],
-        preImageTabs : ['1'],
-        intraImageTabs : ['1'],
-        afterImageTabs : ['1'],
+        preImageTabs : ['根目录'],
+        intraImageTabs : ['根目录'],
+        afterImageTabs : ['根目录'],
         allImageData: [],
         src: '',
         imgNumber: 0,
@@ -350,9 +350,9 @@
           name: '',
           imgdata: [],
         },
-        preBath: '1',
-        intraBath: '1',
-        afterBath: '1',
+        preBath: '根目录',
+        intraBath: '根目录',
+        afterBath: '根目录',
         activeType: '',
         dialogLoading: false,
       };
@@ -822,16 +822,16 @@
         this.allImageData =  [];
         this.imgNumber =  0;
         this.isLoadingImg = false;
-        this.preImageTabs = ['1'];
-        this.intraImageTabs  = ['1'];
-        this.afterImageTabs  = ['1'];
+        this.preImageTabs = ['根目录'];
+        this.intraImageTabs  = ['根目录'];
+        this.afterImageTabs  = ['根目录'];
         this.dialogObj = {
           name : '',
           imgdata : [],
         },
-        this.preBath = '1';
-        this.intraBath = '1';
-        this.afterBath = '1';
+        this.preBath = '根目录';
+        this.intraBath = '根目录';
+        this.afterBath = '根目录';
       },
       closeDialog() {
         this.addFloderVisible = false;
