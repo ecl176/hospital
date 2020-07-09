@@ -480,7 +480,8 @@
           </div>
           <div class="photo-item">
             <label>术前</label>
-            <div class="upload-img-btn">
+            <a-button type="primary" @click="handleAddFloder('PRE_OPERATIVE_IMAGE_TYPE')" class="add-floder">新增批次</a-button>
+            <!-- <div class="upload-img-btn">
               <a-upload
                 listType="picture-card"
                 class="avatar-uploader"
@@ -499,11 +500,35 @@
                 <a-icon type="delete" />
               </a-button>
               <img :src="item.src" alt="">
-            </div>
+            </div> -->
+            <a-tabs v-model="preBath" v-show="preImageTabs.length > 0">
+              <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+                <div class="upload-img-btn">
+                  <a-upload
+                    listType="picture-card"
+                    class="avatar-uploader"
+                    :showUploadList="false"
+                    accept="image/*"
+                    :customRequest="beforeImgUpload"
+                  >
+                    <div>
+                      <a-icon type="plus" />
+                      <div class="ant-upload-text">上传</div>
+                    </div>
+                  </a-upload>
+                </div>
+                <div class="items-list" v-for="(item, indexs) in editObj.preImageData" :key="item.id" v-show="item.bath === items">
+                  <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
+                    <a-icon type="delete" />
+                  </a-button>
+                  <img :src="item.src" alt="" >
+                </div>
+              </a-tab-pane>
+            </a-tabs>
           </div>
           <div class="photo-item">
             <label>术中</label>
-            <div class="upload-img-btn">
+            <!-- <div class="upload-img-btn">
               <a-upload
                 listType="picture-card"
                 class="avatar-uploader"
@@ -522,10 +547,36 @@
                 <a-icon type="delete" />
               </a-button>
               <img :src="item.src" alt="">
-            </div>
+            </div> -->
+            <a-button type="primary" class="add-floder" @click="handleAddFloder('INTRA_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
+            <a-tabs v-model="intraBath" v-show="intraImageTabs.length > 0">
+              <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+                <div class="upload-img-btn">
+                  <a-upload
+                    listType="picture-card"
+                    class="avatar-uploader"
+                    :showUploadList="false"
+                    accept="image/*"
+                    :customRequest="intraImgUpload"
+                  >
+                    <div>
+                      <a-icon type="plus" />
+                      <div class="ant-upload-text">上传</div>
+                    </div>
+                  </a-upload>
+                </div>
+                <div class="items-list" v-for="(item, indexs) in editObj.intraImageData" :key="item.id" v-show="item.bath === items">
+                  <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
+                    <a-icon type="delete" />
+                  </a-button>
+                  <img :src="item.src" alt="" >
+                </div>
+              </a-tab-pane>
+            </a-tabs>
           </div>
           <div class="photo-item">
             <label>术后</label>
+            <!--
             <div class="upload-img-btn">
               <a-upload
                 listType="picture-card"
@@ -546,6 +597,31 @@
               </a-button>
               <img :src="item.src" alt="">
             </div>
+            -->
+            <a-tabs v-model="afterBath" v-show="afterImageTabs.length > 0">
+              <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+                <div class="upload-img-btn">
+                  <a-upload
+                    listType="picture-card"
+                    class="avatar-uploader"
+                    :showUploadList="false"
+                    accept="image/*"
+                    :customRequest="afterImgUpload"
+                  >
+                    <div>
+                      <a-icon type="plus" />
+                      <div class="ant-upload-text">上传</div>
+                    </div>
+                  </a-upload>
+                </div>
+                <div class="items-list" v-for="(item, indexs) in editObj.afterImageData" :key="item.id" v-show="item.bath === items">
+                  <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
+                    <a-icon type="delete" />
+                  </a-button>
+                  <img :src="item.src" alt="" >
+                </div>
+              </a-tab-pane>
+            </a-tabs>
           </div>
         </div>
       </div>
@@ -566,6 +642,10 @@
           <a-input placeholder="请输入批次名称" v-model="dialogObj.name" style="width: 280px;" />
         </p>
         <div class="img-list">
+          <div class="mask" v-show="dialogLoading">
+            <a-spin tip="图片加载中请稍等..." size="large" class="spin-icon">
+            </a-spin>
+          </div>
           <a-row :gutter="16">
             <a-col :span="8" v-for="(item, index) in dialogObj.imgdata" :key="index">
               <div class="img-item" style="text-align:center;">
@@ -750,6 +830,11 @@ import { downloadFileFromResource } from '@/utils/file'
           imgdata: [],
         },
         activeType: '',
+        preBath: '1',
+        intraBath: '1',
+        afterBath: '1',
+        dialogLoading: false,
+        patientId: '',
       };
     },
     mounted() {
@@ -978,6 +1063,7 @@ import { downloadFileFromResource } from '@/utils/file'
       // 处理操作
       hancleOpt: function(rowData, type) {
         const self = this;
+        self.patientId = rowData.caseNo;
         if(type === 'get') {
           self.checkPatientInfoVisible = true;
           self.checkObj = rowData;
@@ -1109,6 +1195,7 @@ import { downloadFileFromResource } from '@/utils/file'
         formData.append('image', file.file);
         formData.append('type', 'PRE_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.editObj.hospitalNum);
+        formData.append('bath', self.preBath);
         self.$http.post('/swing/image', formData)
         .then((res) => {
           const data = res.data;
@@ -1116,7 +1203,8 @@ import { downloadFileFromResource } from '@/utils/file'
           const obj = {
             src: 'data:image/png;base64,' + data.image,
             type: data.imageType,
-            id: data.imageUid
+            id: data.imageUid,
+            bath: data.bath,
           };
           self.editObj.preImageData.push(obj);
           self.editObj.isLoadingImg = false;
@@ -1131,6 +1219,7 @@ import { downloadFileFromResource } from '@/utils/file'
         formData.append('image', file.file);
         formData.append('type', 'INTRA_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.editObj.hospitalNum);
+        formData.append('bath', self.intraBath);
         self.$http.post('/swing/image', formData)
         .then((res) => {
           self.editObj.isLoadingImg = false;
@@ -1139,7 +1228,8 @@ import { downloadFileFromResource } from '@/utils/file'
           const obj = {
             src: 'data:image/png;base64,' + data.image,
             type: data.imageType,
-            id: data.imageUid
+            id: data.imageUid,
+            bath: data.bath,
           };
           self.editObj.intraImageData.push(obj);
         }).catch((err) => {
@@ -1153,6 +1243,7 @@ import { downloadFileFromResource } from '@/utils/file'
         formData.append('image', file.file);
         formData.append('type', 'POST_OPERATIVE_IMAGE_TYPE');
         formData.append('caseNo', self.editObj.hospitalNum);
+        formData.append('bath', self.afterBath);
         self.$http.post('/swing/image', formData)
         .then((res) => {
           self.editObj.isLoadingImg = false;
@@ -1161,7 +1252,8 @@ import { downloadFileFromResource } from '@/utils/file'
           const obj = {
             src: 'data:image/png;base64,' + data.image,
             type: data.imageType,
-            id: data.imageUid
+            id: data.imageUid,
+            bath: data.bath,
           };
           self.editObj.afterImageData.push(obj);
 
@@ -1198,6 +1290,9 @@ import { downloadFileFromResource } from '@/utils/file'
         this.preImageTabs = ['1'];
         this.intraImageTabs = ['1'];
         this.afterImageTabs = ['1'];
+        this.preBath = '1';
+        this.intraBath = '1';
+        this.afterBath = '1';
       },
       // 删除患者信息 弹窗关闭
       handleDelInfo: function() {
@@ -1267,6 +1362,12 @@ import { downloadFileFromResource } from '@/utils/file'
       },
       handleCloseEditModal: function() {
         this.editModalVisible = false;
+        this.preImageTabs = ['1'];
+        this.intraImageTabs = ['1'];
+        this.afterImageTabs = ['1'];
+        this.preBath = '1';
+        this.intraBath = '1';
+        this.afterBath = '1';
       },
       // 处理导出
       handleExport() {
@@ -1386,6 +1487,85 @@ import { downloadFileFromResource } from '@/utils/file'
         this.addFloderVisible = true;
         this.activeType = type;
       },
+      handleAddFloderData() {
+        const self = this;
+        if (self.dialogObj.name === '') {
+          self.$message.error('请输入新增批次名称');
+        } else if (self.dialogObj.imgdata.length === 0) {
+          self.$message.error('请上传图片');
+        } else {
+          if (self.activeType === 'PRE_OPERATIVE_IMAGE_TYPE') {
+            self.preImageTabs.push(self.dialogObj.name);
+            self.preBath = self.dialogObj.name;
+            self.editObj.preImageData = self.editObj.preImageData.concat(self.dialogObj.imgdata);
+          } else if (self.activeType === 'INTRA_OPERATIVE_IMAGE_TYPE') {
+            self.intraImageTabs.push(self.dialogObj.name);
+            self.intraBath = self.dialogObj.name;
+            self.editObj.intraImageData = self.editObj.intraImageData.concat(self.dialogObj.imgdata);
+          } else {
+            self.afterImageTabs.push(self.dialogObj.name);
+            self.afterBath = self.dialogObj.name;
+            self.editObj.afterImageData = self.editObj.afterImageData.concat(self.dialogObj.imgdata);
+          }
+          self.$message.success('新增批次成功');
+          self.addFloderVisible = false;
+          self.dialogObj.name = '';
+          self.dialogObj.imgdata = [];
+        }
+      },
+      addDialogImage(file) {
+        const self = this;
+        const formData = new FormData();
+        // let bath = '';
+        // if (self.activeType === 'PRE_OPERATIVE_IMAGE_TYPE') {
+        //   bath = self.preBath;
+        // } else if (self.activeType === 'INTRA_OPERATIVE_IMAGE_TYPE') {
+        //   bath = self.intraBath;
+        // } else {
+        //   bath = self.afterBath;
+        // }
+        if (self.dialogObj.name === '') {
+          this.$message.error('请输入批次名称');
+        } else {
+          self.dialogLoading = true;
+          formData.append('image', file.file);
+          formData.append('type', self.activeType);
+          formData.append('caseNo', self.patientId);
+          formData.append('bath', self.dialogObj.name);
+          self.$http.post('/swing/image', formData)
+          .then((res) => {
+            const data = res.data;
+            self.src = 'data:image/png;base64,' + data.image;
+            const obj = {
+              src: 'data:image/png;base64,' + data.image,
+              type: data.imageType,
+              id: data.imageUid,
+              bath: data.bath
+            };
+            self.dialogObj.imgdata.push(obj);
+            self.dialogLoading = false;
+          }).catch((err) => {
+            console.log(err);
+            self.dialogLoading = false;
+          });
+        }
+      },
+      handleDeleteDialogImg(uuid, type, index) {
+        const self = this;
+        let arr = [];
+        arr[0] = uuid;
+        const params = {
+          uuids: arr
+        }
+        self.$http.post('/swing/image/multipleDelete', params)
+        .then(() => {
+          self.dialogObj.imgdata.splice(index, 1);
+          self.$message.success('删除成功');
+        }).catch((err) => {
+          console.log(err);
+          self.$message.error('删除失败');
+        });
+      }
     },
     computed: {
       rowSelection() {
@@ -1574,10 +1754,11 @@ import { downloadFileFromResource } from '@/utils/file'
       //   }
       // }
       .photo-item {
-        padding-left: 202px;
+        padding-left:100px;
         min-height: 200px;
         margin-top: 15px;
         overflow: hidden;
+        position: relative;
         label {
           width: 100px;
           display: block;
@@ -1586,13 +1767,12 @@ import { downloadFileFromResource } from '@/utils/file'
           float: left;
           position: relative;
           top: 80px;
-          left: -110px;
+          left: 0;
         }
         .upload-img-btn {
           float: left;
           width: 102px;
-          height: 102px;
-          margin-left: -102px;
+          height: 104px;
           margin-top: 45px;
         }
         .items-list {
@@ -1625,11 +1805,70 @@ import { downloadFileFromResource } from '@/utils/file'
             }
           }
         }
+        .add-floder {
+          position: absolute;
+          right: 25px;
+          top: 5px;
+          cursor: pointer;
+          z-index: 10;
+        }
       }
     }
   }
 </style>
 <style lang="scss" scoped>
+.dialog-content {
+  .input-panel {
+    padding-left: 40px;
+    margin-bottom: 16px;
+  }
+  .img-list {
+    position: relative;
+    .mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,.3);
+      text-align: center;
+      z-index: 9999;
+      .spin-icon {
+        top: 35%;
+        position: relative;
+      }
+      .upload-explain {
+        margin-top: 200px;
+        color: #ddd;
+        font-size: 20px;
+      }
+    }
+    .img-item {
+      text-align: center;
+      cursor: pointer;
+      img {
+        width: 200px;
+        height: 200px;
+      }
+      &:hover {
+        .del-btn {
+          display: block;
+        }
+      }
+      .del-btn {
+        position: absolute;
+        top: 10px;
+        right: 70px;
+        display: none;
+        width: 20px !important;
+        .anticon{
+          position: relative;
+          left: -7px;
+        }
+      }
+    }
+  }
+}
 .patient-content {
   #printMe {
     position: relative;

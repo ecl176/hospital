@@ -56,7 +56,7 @@
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">患者年龄</label>
-            <a-input placeholder="请输入患者年龄" v-model='age' type="number"/>
+            <a-input placeholder="请输入患者年龄" v-model='age'/>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
@@ -268,6 +268,10 @@
           <a-input placeholder="请输入批次名称" v-model="dialogObj.name" style="width: 280px;" />
         </p>
         <div class="img-list">
+          <div class="mask" v-show="dialogLoading">
+            <a-spin tip="图片加载中请稍等..." size="large" class="spin-icon">
+            </a-spin>
+          </div>
           <a-row :gutter="16">
             <a-col :span="8" v-for="(item, index) in dialogObj.imgdata" :key="index">
               <div class="img-item" style="text-align:center;">
@@ -350,6 +354,7 @@
         intraBath: '1',
         afterBath: '1',
         activeType: '',
+        dialogLoading: false,
       };
     },
     mounted() {
@@ -840,9 +845,9 @@
       handleAddFloderData() {
         const self = this;
         if (self.dialogObj.name === '') {
-          this.$message.error('请输入新增批次名称');
+          self.$message.error('请输入新增批次名称');
         } else if (self.dialogObj.imgdata.length === 0) {
-          this.$message.error('请上传图片');
+          self.$message.error('请上传图片');
         } else {
           if (self.activeType === 'PRE_OPERATIVE_IMAGE_TYPE') {
             self.preImageTabs.push(self.dialogObj.name);
@@ -857,7 +862,8 @@
             self.afterBath = self.dialogObj.name;
             self.afterImageData = self.afterImageData.concat(self.dialogObj.imgdata);
           }
-          this.addFloderVisible = false;
+          self.$message.success('新增批次成功');
+          self.addFloderVisible = false;
           self.dialogObj.name = '';
           self.dialogObj.imgdata = [];
         }
@@ -876,6 +882,7 @@
         if (self.dialogObj.name === '') {
           this.$message.error('请输入批次名称');
         } else {
+          self.dialogLoading = true;
           formData.append('image', file.file);
           formData.append('type', self.activeType);
           formData.append('caseNo', self.patientId);
@@ -891,8 +898,10 @@
               bath: data.bath
             };
             self.dialogObj.imgdata.push(obj);
+            self.dialogLoading = false;
           }).catch((err) => {
             console.log(err);
+            self.dialogLoading = false;
           });
         }
       },
@@ -943,6 +952,26 @@
     margin-bottom: 16px;
   }
   .img-list {
+    position: relative;
+    .mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,.3);
+      text-align: center;
+      z-index: 9999;
+      .spin-icon {
+        top: 35%;
+        position: relative;
+      }
+      .upload-explain {
+        margin-top: 200px;
+        color: #ddd;
+        font-size: 20px;
+      }
+    }
     .img-item {
       text-align: center;
       img {
