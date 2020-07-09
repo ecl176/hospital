@@ -167,7 +167,7 @@
         <label>术前</label>
         <a-button type="primary" @click="handleAddFloder('PRE_OPERATIVE_IMAGE_TYPE')" class="add-floder">新增批次</a-button>
         <a-tabs v-model="preBath" v-show="preImageTabs.length > 0">
-          <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+          <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items">
             <div class="upload-img-btn">
               <a-upload
                 listType="picture-card"

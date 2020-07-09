@@ -41,13 +41,13 @@
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">患者起始年龄</label>
-            <a-input placeholder="请输入患者年龄" v-model='searchObj.startage' type="number"/>
+            <a-input placeholder="请输入患者年龄" v-model='searchObj.startage'/>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">患者终止年龄</label>
-            <a-input placeholder="请输入患者年龄" v-model='searchObj.endage' type="number"/>
+            <a-input placeholder="请输入患者年龄" v-model='searchObj.endage'/>
           </div>
         </a-col>
       </a-row>
@@ -275,7 +275,7 @@
         <div class="photo-item">
           <label>术前</label>
           <a-tabs defaultActiveKey='1'>
-            <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+            <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items">
               <div class="items-list" v-for="(item) in checkPreImageData" :key="item.id" v-show="item.bath === items">
                 <img :src="item.src" alt="" >
               </div>
@@ -285,7 +285,7 @@
         <div class="photo-item">
           <label>术中</label>
           <a-tabs defaultActiveKey='1'>
-            <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+            <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items">
               <div class="items-list" v-for="(item) in checkIntraImageData" :key="item.id" v-show="item.bath === items">
                 <img :src="item.src" alt="" >
               </div>
@@ -295,7 +295,7 @@
         <div class="photo-item">
           <label>术后</label>
           <a-tabs defaultActiveKey='1'>
-            <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+            <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items">
               <div class="items-list" v-for="(item) in checkAfterImageData" :key="item.id" v-show="item.bath === items">
                 <img :src="item.src" alt="" >
               </div>
@@ -368,7 +368,7 @@
             <a-col class="gutter-row" :span="8">
               <div class="gutter-box">
                 <label class="label">患者年龄</label>
-                <a-input placeholder="请输入患者年龄" v-model='editObj.age' type="number"/>
+                <a-input placeholder="请输入患者年龄" v-model='editObj.age'/>
               </div>
             </a-col>
             <a-col class="gutter-row" :span="8">
@@ -502,7 +502,7 @@
               <img :src="item.src" alt="">
             </div> -->
             <a-tabs v-model="preBath" v-show="preImageTabs.length > 0">
-              <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+              <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items">
                 <div class="upload-img-btn">
                   <a-upload
                     listType="picture-card"
@@ -550,7 +550,7 @@
             </div> -->
             <a-button type="primary" class="add-floder" @click="handleAddFloder('INTRA_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
             <a-tabs v-model="intraBath" v-show="intraImageTabs.length > 0">
-              <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+              <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items">
                 <div class="upload-img-btn">
                   <a-upload
                     listType="picture-card"
@@ -599,7 +599,7 @@
             </div>
             -->
             <a-tabs v-model="afterBath" v-show="afterImageTabs.length > 0">
-              <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items === '1' ? '默认' : items">
+              <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items">
                 <div class="upload-img-btn">
                   <a-upload
                     listType="picture-card"
