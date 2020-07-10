@@ -71,12 +71,12 @@
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">手术方式</label>
+            <label class="label">手术名称</label>
             <a-select
               mode="tags"
               style="width: 100%"
               @change="handleSearchSsfsChange"
-              placeholder="请选择手术方式"
+              placeholder="请选择手术名称"
               :value="searchObj.ssfsData"
               >
               <a-select-option v-for="(item, index) in allSsfsData" :key="index" :value="item">
@@ -185,7 +185,7 @@
           <th>联系电话</th>
           <th>主治医生</th>
           <th>诊断部位</th>
-          <th>手术方式</th>
+          <th>手术名称</th>
           <th>治疗方式</th>
           <th>治疗结果</th>
         </tr>
@@ -257,7 +257,7 @@
           <td>{{checkObj.treatmentMethod}}</td>
           <td>治疗结果</td>
           <td>{{checkObj.treatmentOutcome}}</td>
-          <td>手术方式</td>
+          <td>手术名称</td>
           <td>{{checkObj.operationName}}</td>
         </tr>
         <tr>
@@ -392,12 +392,12 @@
           <a-row :gutter="16">
             <a-col class="gutter-row" :span="8">
               <div class="gutter-box">
-                <label class="label">手术方式</label>
+                <label class="label">手术名称</label>
                 <a-select
                   mode="tags"
                   style="width: 100%"
                   @change="handleEditSsfsChange"
-                  placeholder="请选择手术方式"
+                  placeholder="请选择手术名称"
                   :value="editObj.ssfsData"
                   >
                   <a-select-option v-for="(item, index) in allSsfsData" :key="index" :value="item">
@@ -722,7 +722,7 @@ import { downloadFileFromResource } from '@/utils/file'
       align: 'center'
     },
     {
-      title: '手术方式',
+      title: '手术名称',
       dataIndex: 'operationName',
       align: 'center'
     },
@@ -762,7 +762,7 @@ import { downloadFileFromResource } from '@/utils/file'
         allCaseData: [],//医生信息
         caseData: [],
         allZdData: [],//诊断部位数据
-        allSsfsData: [],//所有手术方式数据
+        allSsfsData: [],//所有手术名称数据
         allZlfsData: [],//所有治疗方式数据
         allZljgData: [],//所有治疗结果数据
         columns: columns, // 表格头
@@ -800,7 +800,7 @@ import { downloadFileFromResource } from '@/utils/file'
           currentCaseName: [],
           currentCaseId: "", // 默认医生信息
           zdData: [],//当前选择诊断部位数据
-          ssfsData: [],//当前选中手术方式
+          ssfsData: [],//当前选中手术名称
           zlfsData:[],//当前选中治疗方式
           zljgData: [],//当前选中治疗结果
           patientName: '',//患者姓名
@@ -840,7 +840,7 @@ import { downloadFileFromResource } from '@/utils/file'
     mounted() {
       this.getCaseData(); // 获取所有医生信息
       this.getDiagnosisData();//获取所有诊断数据
-      this.getOperationData();// 获取所有手术方式数据
+      this.getOperationData();// 获取所有手术名称数据
       this.getTreatmentMethodData();// 获取所有治疗方式数据
       this.getTreatmentOutcomeData();
       this.handleSearch();
@@ -876,7 +876,7 @@ import { downloadFileFromResource } from '@/utils/file'
           self.$message.error('请求失败');
         });
       },
-      //获取所有手术方式数据
+      //获取所有手术名称数据
       getOperationData() {
         const self = this;
         this.$http.get('/swing/dictionary/OPERATION_NAME_TYPE').then((res) => {
@@ -941,7 +941,7 @@ import { downloadFileFromResource } from '@/utils/file'
       handleSearchZdbwChange(selectedItems) {
         this.searchObj.zdData = selectedItems;
       },
-      // 手术方式
+      // 手术名称
       handleSearchSsfsChange(item) {
         this.searchObj.ssfsData = item;
       },
@@ -1044,7 +1044,7 @@ import { downloadFileFromResource } from '@/utils/file'
       handleEditZdbwChange(selectedItems) {
         this.editObj.zdData = selectedItems;
       },
-      //手术方式
+      //手术名称
       handleEditSsfsChange(item) {
         this.editObj.ssfsData = item;
       },
@@ -1340,7 +1340,7 @@ import { downloadFileFromResource } from '@/utils/file'
           self.$message.success('编辑成功');
           window.scrollTo(0, 0);
           self.getDiagnosisData();//获取所有诊断数据
-          self.getOperationData();// 获取所有手术方式数据
+          self.getOperationData();// 获取所有手术名称数据
           self.getTreatmentMethodData();// 获取所有治疗方式数据
           self.getTreatmentOutcomeData();
           // let tableObj = self.tableData[self.tableCurrentIndex];
