@@ -166,6 +166,7 @@
       <div class="photo-item">
         <label>术前</label>
         <a-button type="primary" @click="handleAddFloder('PRE_OPERATIVE_IMAGE_TYPE')" class="add-floder">新增批次</a-button>
+        <!-- <a-button type="primary" @click="handleEditFloder('before')" class="edit-floder">修改批次</a-button> -->
         <a-tabs v-model="preBath" defaultActiveKey="根目录" v-show="preImageTabs.length > 0">
           <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items">
             <div class="upload-img-btn">
@@ -186,7 +187,7 @@
               <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
                 <a-icon type="delete" />
               </a-button>
-              <img :src="item.src" alt="" >
+              <img :src="item.src" alt="" @click="handleShowImage(preImageData)">
             </div>
           </a-tab-pane>
         </a-tabs>
@@ -194,6 +195,7 @@
       <div class="photo-item">
         <label>术中</label>
         <a-button type="primary" class="add-floder" @click="handleAddFloder('INTRA_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
+        <!-- <a-button type="primary" @click="handleEditFloder('intra')" class="edit-floder">修改批次</a-button> -->
         <a-tabs v-model="intraBath" defaultActiveKey="根目录" @change="callback" v-show="intraImageTabs.length > 0">
           <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items">
             <div class="upload-img-btn">
@@ -214,7 +216,7 @@
               <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
                 <a-icon type="delete" />
               </a-button>
-              <img :src="item.src" alt="" >
+              <img :src="item.src" alt="" @click="handleShowImage(intraImageData)">
             </div>
           </a-tab-pane>
         </a-tabs>
@@ -222,6 +224,7 @@
       <div class="photo-item">
         <label>术后</label>
         <a-button type="primary" class="add-floder" @click="handleAddFloder('POST_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
+        <!-- <a-button type="primary" @click="handleEditFloder('after')" class="edit-floder">修改批次</a-button> -->
         <a-tabs v-model="afterBath" defaultActiveKey="根目录" v-show="afterImageTabs.length > 0">
           <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items">
             <div class="upload-img-btn">
@@ -242,7 +245,7 @@
               <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
                 <a-icon type="delete" />
               </a-button>
-              <img :src="item.src" alt="" >
+              <img :src="item.src" alt="" @click="handleShowImage(afterImageData)">
             </div>
           </a-tab-pane>
         </a-tabs>
@@ -265,7 +268,7 @@
       <div class="dialog-content">
         <p class="input-panel">
           <label>名称：</label>
-          <a-input placeholder="请输入批次名称" v-model="dialogObj.name" style="width: 280px;" />
+          <a-input placeholder="请输入批次名称" v-model="dialogObj.name" :disabled="dialogObj.imgdata.length !== 0" style="width: 280px;" />
         </p>
         <div class="img-list">
           <div class="mask" v-show="dialogLoading">
@@ -289,6 +292,7 @@
                   :showUploadList="false"
                   accept="image/*"
                   :customRequest="addDialogImage"
+                  :multiple="true"
                 >
                   <div>
                     <a-icon type="plus" style="font-size: 34px;" />
@@ -301,6 +305,28 @@
         </div>
       </div>
     </a-modal>
+    <a-modal
+      title="修改批次"
+      :visible="editFloderVisible"
+      :width = '600'
+      @cancel = "closeEditDialog"
+      @ok="handleEditFloderData"
+      :maskClosable='false'
+      style="top: 20px;"
+      :destroyOnClose="true"
+    >
+      <div class="edit-content">
+        <ul style="list-style:none;margin-left: 30px;">
+          <li v-for="(item, index) in editData" :key="index" style="margin-bottom: 10px;">
+            <a-input :value="item" style="color:'#333';width: 260px;"/>
+            <a-button type="primary" style="margin-left: 15px;">删除</a-button>
+          </li>
+        </ul>
+      </div>
+    </a-modal>
+    <viewer ref="viewer" :images="imagesList" v-show="false">
+      <img v-for="(item, index) in imagesList" :src="item.src" :key="index">
+    </viewer>
   </div>
 </template>
 <script>
@@ -355,6 +381,10 @@
         afterBath: '根目录',
         activeType: '',
         dialogLoading: false,
+        imagesList: [],
+        editFloderVisible: false,
+        editType: '',
+        editData: [],
       };
     },
     mounted() {
@@ -833,10 +863,27 @@
         this.intraBath = '根目录';
         this.afterBath = '根目录';
       },
-      closeDialog() {
-        this.addFloderVisible = false;
-        this.dialogObj.name = '';
-        this.dialogObj.imgdata = [];
+      async closeDialog() {
+        const self = this;
+        if (self.dialogObj.imgdata.length > 0) {
+          let arr = [];
+          self.dialogObj.imgdata.forEach((list) => {
+            arr.push(list.id);
+          });
+          const params = {
+            uuids: arr
+          };
+          await self.$http.post('/swing/image/multipleDelete', params)
+          .then(() => {
+            // self.$message.success('删除成功');
+          }).catch((err) => {
+            console.log(err);
+            // self.$message.error('删除失败');
+          });
+        }
+        self.addFloderVisible = false;
+        self.dialogObj.name = '';
+        self.dialogObj.imgdata = [];
       },
       handleAddFloder(type) {
         this.addFloderVisible = true;
@@ -871,14 +918,6 @@
       addDialogImage(file) {
         const self = this;
         const formData = new FormData();
-        // let bath = '';
-        // if (self.activeType === 'PRE_OPERATIVE_IMAGE_TYPE') {
-        //   bath = self.preBath;
-        // } else if (self.activeType === 'INTRA_OPERATIVE_IMAGE_TYPE') {
-        //   bath = self.intraBath;
-        // } else {
-        //   bath = self.afterBath;
-        // }
         if (self.dialogObj.name === '') {
           this.$message.error('请输入批次名称');
         } else {
@@ -920,6 +959,33 @@
           console.log(err);
           self.$message.error('删除失败');
         });
+      },
+      handleShowImage(imgList) {
+        this.imagesList = imgList;
+        this.$refs.viewer.$viewer.show()
+      },
+      closeEditDialog() {
+        this.editFloderVisible = false;
+      },
+      handleEditFloderData() {
+        console.log('确定修改');
+      },
+      // 打开修改弹窗
+      handleEditFloder(type) {
+        this.editFloderVisible = true;
+        this.editType = type;
+        switch(this.editType) {
+          case 'before': 
+            this.editData = this.preImageTabs;
+            break;
+          case 'intra':
+            this.editData = this.intraImageTabs;
+            break;
+          case 'after':
+            this.editData = this.afterImageTabs;
+            break;
+        }
+        console.log(this.editData);
       }
     },
   };
@@ -1109,6 +1175,13 @@
       .add-floder {
         position: absolute;
         right: 25px;
+        top: 5px;
+        cursor: pointer;
+        z-index: 10;
+      }
+      .edit-floder {
+        position: absolute;
+        right: 125px;
         top: 5px;
         cursor: pointer;
         z-index: 10;

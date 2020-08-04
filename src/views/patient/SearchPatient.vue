@@ -46,14 +46,6 @@
         </a-col>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">患者终止年龄</label>
-            <a-input placeholder="请输入患者年龄" v-model='searchObj.endage'/>
-          </div>
-        </a-col>
-      </a-row>
-      <a-row :gutter="16">
-        <a-col class="gutter-row" :span="8">
-          <div class="gutter-box">
             <label class="label">诊断</label>
             <a-select
               mode="tags"
@@ -69,6 +61,15 @@
             </a-select>
           </div>
         </a-col>
+        <!-- <a-col class="gutter-row" :span="8">
+          <div class="gutter-box">
+            <label class="label">患者终止年龄</label>
+            <a-input placeholder="请输入患者年龄" v-model='searchObj.endage'/>
+          </div>
+        </a-col>
+        -->
+      </a-row>
+      <a-row :gutter="16">
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">手术方式</label>
@@ -102,8 +103,6 @@
             </a-select>
           </div>
         </a-col>
-      </a-row>
-      <a-row :gutter='16'>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">治疗结果</label>
@@ -121,6 +120,8 @@
             </a-select>
           </div>
         </a-col>
+      </a-row>
+      <a-row :gutter='16'>
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
             <label class="label">入院起始日期</label>
@@ -277,7 +278,7 @@
           <a-tabs defaultActiveKey='根目录'>
             <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items">
               <div class="items-list" v-for="(item) in checkPreImageData" :key="item.id" v-show="item.bath === items">
-                <img :src="item.src" alt="" >
+                <img :src="item.src" alt="" @click="handleShowImage(checkPreImageData)">
               </div>
             </a-tab-pane>
           </a-tabs>
@@ -287,7 +288,7 @@
           <a-tabs defaultActiveKey='根目录'>
             <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items">
               <div class="items-list" v-for="(item) in checkIntraImageData" :key="item.id" v-show="item.bath === items">
-                <img :src="item.src" alt="" >
+                <img :src="item.src" alt="" @click="handleShowImage(checkIntraImageData)">
               </div>
             </a-tab-pane>
           </a-tabs>
@@ -297,7 +298,7 @@
           <a-tabs defaultActiveKey='根目录'>
             <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items">
               <div class="items-list" v-for="(item) in checkAfterImageData" :key="item.id" v-show="item.bath === items">
-                <img :src="item.src" alt="" >
+                <img :src="item.src" alt="" @click="handleShowImage(checkAfterImageData)">
               </div>
             </a-tab-pane>
           </a-tabs>
@@ -521,7 +522,7 @@
                   <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
                     <a-icon type="delete" />
                   </a-button>
-                  <img :src="item.src" alt="" >
+                  <img :src="item.src" alt="" @click="handleShowImage(editObj.preImageData)">
                 </div>
               </a-tab-pane>
             </a-tabs>
@@ -569,7 +570,7 @@
                   <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
                     <a-icon type="delete" />
                   </a-button>
-                  <img :src="item.src" alt="" >
+                  <img :src="item.src" alt="" @click="handleShowImage(editObj.intraImageData)">
                 </div>
               </a-tab-pane>
             </a-tabs>
@@ -618,7 +619,7 @@
                   <a-button class="del-btn" @click="handleDeleteImg(item.id,item.type,indexs)" type="primary">
                     <a-icon type="delete" />
                   </a-button>
-                  <img :src="item.src" alt="" >
+                  <img :src="item.src" alt="" @click="handleShowImage(editObj.afterImageData)">
                 </div>
               </a-tab-pane>
             </a-tabs>
@@ -639,7 +640,7 @@
       <div class="dialog-content">
         <p class="input-panel">
           <label>名称：</label>
-          <a-input placeholder="请输入批次名称" v-model="dialogObj.name" style="width: 280px;" />
+          <a-input placeholder="请输入批次名称" v-model="dialogObj.name" :disabled="dialogObj.imgdata.length !== 0" style="width: 280px;" />
         </p>
         <div class="img-list">
           <div class="mask" v-show="dialogLoading">
@@ -652,7 +653,7 @@
                 <a-button class="del-btn" @click="handleDeleteDialogImg(item.id,item.type,indexs)" type="primary">
                   <a-icon type="delete" />
                 </a-button>
-                <img :src="item.src" alt="" style="width: 200px;height:200px;">
+                <img :src="item.src" alt="" style="width: 200px;height:200px;" @click="handleShowImage(dialogObj.imgdata)">
               </div>
             </a-col>
             <a-col :span="8">
@@ -663,6 +664,7 @@
                   :showUploadList="false"
                   accept="image/*"
                   :customRequest="addDialogImage"
+                  :multiple="true"
                 >
                   <div>
                     <a-icon type="plus" style="font-size: 34px;" />
@@ -675,6 +677,9 @@
         </div>
       </div>
     </a-modal>
+    <viewer ref="viewer" :images="imagesList" v-show="false">
+      <img v-for="(item, index) in imagesList" :src="item.src" :key="index">
+    </viewer>
   </div>
 </template>
 <script>
@@ -835,6 +840,7 @@ import { downloadFileFromResource } from '@/utils/file'
         afterBath: '根目录',
         dialogLoading: false,
         patientId: '',
+        imagesList: [],
       };
     },
     mounted() {
@@ -1117,17 +1123,46 @@ import { downloadFileFromResource } from '@/utils/file'
         self.$http.get('/swing/image/' + caseNo)
         .then((res) => {
           const data = res.data;
+          let num = 0;
           data.preOperativeImageList.forEach((item) => {
             if (item.imageItems) {
-              item.imageItems.forEach((list) => {
-                const obj = {
+              num += item.imageItems.length;
+            }
+          });
+          data.intraOperativeImageList.forEach((item) => {
+            if (item.imageItems) {
+              num += item.imageItems.length;
+            }
+          });
+          data.postOperativeImageList.forEach((item) => {
+            if (item.imageItems) {
+              num += item.imageItems.length;
+            }
+          });
+          data.preOperativeImageList.forEach((item) => {
+            if (item.imageItems) {
+              item.imageItems.forEach(async (list) => {
+                let obj = {
                   src: 'data:image/png;base64,' + list.image,
                   type: list.imageType,
                   id: list.imageUid,
                   bath: item.bath,
                 };
-                self.checkPreImageData.push(obj);
-                self.editObj.preImageData.push(obj);
+                // self.checkPreImageData.push(obj);
+                // self.editObj.preImageData.push(obj);
+                const params = {
+                  "imageId": list.imageUid
+                };
+                await self.$http.post('/swing/image/byte',params)
+                .then((res) => {
+                  obj.src = 'data:image/png;base64,' + res.data.imageByte
+                  self.checkPreImageData.push(obj);
+                  self.editObj.preImageData.push(obj);
+                  console.log(self.checkPreImageData.length + self.checkIntraImageData.length + self.checkAfterImageData.length);
+                  if (self.checkPreImageData.length + self.checkIntraImageData.length + self.checkAfterImageData.length === num) {
+                    self.isLoadingImg = false;
+                  }
+                });
               });
               if(self.preImageTabs.indexOf(item.bath) === -1) {
                 self.preImageTabs.push(item.bath);
@@ -1135,23 +1170,30 @@ import { downloadFileFromResource } from '@/utils/file'
             }
           });
           data.intraOperativeImageList.forEach((item) => {
-            // const obj = {
-            //   src: 'data:image/png;base64,' + item.image,
-            //   type: item.imageType,
-            //   id: item.imageUid
-            // };
-            // self.checkIntraImageData.push(obj);
-            // self.editObj.intraImageData.push(obj);
             if (item.imageItems) {
-              item.imageItems.forEach((list) => {
+              item.imageItems.forEach(async (list) => {
                 const obj = {
                   src: 'data:image/png;base64,' + list.image,
                   type: list.imageType,
                   id: list.imageUid,
                   bath: item.bath,
                 };
-                self.checkIntraImageData.push(obj);
-                self.editObj.intraImageData.push(obj);
+                // self.checkIntraImageData.push(obj);
+                // self.editObj.intraImageData.push(obj);
+                const params = {
+                  "imageId": list.imageUid
+                };
+                await self.$http.post('/swing/image/byte',params)
+                .then((res) => {
+                  obj.src = 'data:image/png;base64,' + res.data.imageByte
+                  self.checkIntraImageData.push(obj);
+                  self.editObj.intraImageData.push(obj);
+                  console.log(self.checkPreImageData.length + self.checkIntraImageData.length + self.checkAfterImageData.length);
+
+                  if (self.checkPreImageData.length + self.checkIntraImageData.length + self.checkAfterImageData.length === num) {
+                    self.isLoadingImg = false;
+                  }
+                });
               });
               if(self.intraImageTabs.indexOf(item.bath) === -1) {
                 self.intraImageTabs.push(item.bath);
@@ -1159,30 +1201,35 @@ import { downloadFileFromResource } from '@/utils/file'
             }
           });
           data.postOperativeImageList.forEach((item) => {
-            // const obj = {
-            //   src: 'data:image/png;base64,' + item.image,
-            //   type: item.imageType,
-            //   id: item.imageUid
-            // };
-            // self.checkAfterImageData.push(obj);
-            // self.editObj.afterImageData.push(obj);
             if (item.imageItems) {
-              item.imageItems.forEach((list) => {
+              item.imageItems.forEach(async (list) => {
                 const obj = {
                   src: 'data:image/png;base64,' + list.image,
                   type: list.imageType,
                   id: list.imageUid,
                   bath: item.bath,
                 };
-                self.checkAfterImageData.push(obj);
-                self.editObj.afterImageData.push(obj);
+                // self.checkAfterImageData.push(obj);
+                // self.editObj.afterImageData.push(obj);
+                const params = {
+                  "imageId": list.imageUid
+                };
+                await self.$http.post('/swing/image/byte',params)
+                .then((res) => {
+                  obj.src = 'data:image/png;base64,' + res.data.imageByte
+                  self.checkAfterImageData.push(obj);
+                  self.editObj.afterImageData.push(obj);
+                  console.log(self.checkPreImageData.length + self.checkIntraImageData.length + self.checkAfterImageData.length);
+                  if (self.checkPreImageData.length + self.checkIntraImageData.length + self.checkAfterImageData.length === num) {
+                    self.isLoadingImg = false;
+                  }
+                });
               });
               if(self.afterImageTabs.indexOf(item.bath) === -1) {
                 self.afterImageTabs.push(item.bath);
               }
             }
           });
-          self.isLoadingImg = false;
         }).catch(() => {
           self.$message.error('请求失败');
         });
@@ -1478,10 +1525,27 @@ import { downloadFileFromResource } from '@/utils/file'
           this.printIsShow = false;
         }, 0);
       },
-      closeDialog() {
-        this.addFloderVisible = false;
-        this.dialogObj.name = '';
-        this.dialogObj.imgdata = [];
+      async closeDialog() {
+        const self = this;
+        if (self.dialogObj.imgdata.length > 0) {
+          let arr = [];
+          self.dialogObj.imgdata.forEach((list) => {
+            arr.push(list.id);
+          });
+          const params = {
+            uuids: arr
+          };
+          await self.$http.post('/swing/image/multipleDelete', params)
+          .then(() => {
+            // self.$message.success('删除成功');
+          }).catch((err) => {
+            console.log(err);
+            // self.$message.error('删除失败');
+          });
+        }
+        self.addFloderVisible = false;
+        self.dialogObj.name = '';
+        self.dialogObj.imgdata = [];
       },
       handleAddFloder(type) {
         this.addFloderVisible = true;
@@ -1565,7 +1629,11 @@ import { downloadFileFromResource } from '@/utils/file'
           console.log(err);
           self.$message.error('删除失败');
         });
-      }
+      },
+      handleShowImage(imgList) {
+        this.imagesList = imgList;
+        this.$refs.viewer.$viewer.show()
+      },
     },
     computed: {
       rowSelection() {
@@ -1624,6 +1692,7 @@ import { downloadFileFromResource } from '@/utils/file'
         margin-left: 20px;
         width: 200px;
         height: 200px;
+        cursor: pointer;
       }
       .items-list {
         float: left;
