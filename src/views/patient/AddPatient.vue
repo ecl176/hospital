@@ -80,12 +80,12 @@
       <a-row :gutter="16">
         <a-col class="gutter-row" :span="8">
           <div class="gutter-box">
-            <label class="label">手术方式</label>
+            <label class="label">手术名称</label>
             <a-select
               mode="tags"
               style="width: 100%"
               @change="handleSsfsChange"
-              placeholder="请选择手术方式"
+              placeholder="请选择手术名称"
               :value="ssfsData"
               >
               <a-select-option v-for="(item, index) in allSsfsData" :key="index" :value="item">
@@ -331,7 +331,7 @@
 </template>
 <script>
   // const allZdData = ['头部','脸部','腿部','胳膊'];//所有诊断数据
-  // const allSsfsData = ['开刀','切割'];//所有手术方式数据
+  // const allSsfsData = ['开刀','切割'];//所有手术名称数据
   // const allZlfsData = ['药物治疗','手术'];//所有治疗方式数据
   // const allZljgData = ['好转','出院','安全康复']// 所有治疗结果数据
   const conf = require('../../assets/common/config')
@@ -345,8 +345,8 @@
         currentCaseId: "", // 默认医生信息
         allZdData: [],//诊断部位数据
         zdData: [],//当前选择诊断部位数据
-        allSsfsData: [],//所有手术方式数据
-        ssfsData: [],//当前选中手术方式
+        allSsfsData: [],//所有手术名称数据
+        ssfsData: [],//当前选中手术名称
         allZlfsData: [],//所有治疗方式数据
         zlfsData:[],//当前选中治疗方式
         allZljgData: [],//所有治疗结果数据
@@ -390,7 +390,7 @@
     mounted() {
       this.getCaseData(); // 获取所有医生信息
       this.getDiagnosisData();//获取所有诊断数据
-      this.getOperationData();// 获取所有手术方式数据
+      this.getOperationData();// 获取所有手术名称数据
       this.getTreatmentMethodData();// 获取所有治疗方式数据
       this.getTreatmentOutcomeData();
     },
@@ -425,7 +425,7 @@
           self.$message.error('请求失败');
         });
       },
-      //获取所有手术方式数据
+      //获取所有手术名称数据
       getOperationData() {
         const self = this;
         this.$http.get('/swing/dictionary/OPERATION_NAME_TYPE').then((res) => {
@@ -584,7 +584,7 @@
             // self.zdData = [];
             // self.zdData.push(data.diagnosis);// 诊断
             // self.ssfsData = [];
-            // self.ssfsData.push(data.operationName); // 手术方式
+            // self.ssfsData.push(data.operationName); // 手术名称
             // 获取患者信息
             self.getPatientInfo();
           }
@@ -615,7 +615,7 @@
             })
             self.ssfsData = [];
             data.operationName.forEach((item) => {
-              self.ssfsData.push(item.dictionaryValue); // 手术方式
+              self.ssfsData.push(item.dictionaryValue); // 手术名称
             })
             self.uploadAllImage();
           }
@@ -640,7 +640,7 @@
       handleZdbwChange(selectedItems) {
         this.zdData = selectedItems;
       },
-      // 手术方式
+      // 手术名称
       handleSsfsChange(item) {
         const self = this;
         self.ssfsData = item;
@@ -689,7 +689,7 @@
         //   return false;
         // }
         // if(params.operationName.length === 0) {
-        //   self.$message.error('请选择手术方式');
+        //   self.$message.error('请选择手术名称');
         //   return false;
         // }
         if(params.patientName === '') {
@@ -714,7 +714,7 @@
           self.$message.success('上传成功');
           window.scrollTo(0, 0);
           self.getDiagnosisData();//获取所有诊断数据
-          self.getOperationData();// 获取所有手术方式数据
+          self.getOperationData();// 获取所有手术名称数据
           self.getTreatmentMethodData();// 获取所有治疗方式数据
           self.getTreatmentOutcomeData();
         }).catch((err) => {
@@ -833,7 +833,7 @@
         this.currentCaseId = ""; // 默认医生信息
         this.currentCaseName = [];
         this.zdData =  [];//当前选择诊断部位数据
-        this.ssfsData =  [];//当前选中手术方式
+        this.ssfsData =  [];//当前选中手术名称
         this.zlfsData = [];//当前选中治疗方式
         this.zljgData =  [];//当前选中治疗结果
         this.patientName =  '';//患者姓名

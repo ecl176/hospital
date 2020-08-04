@@ -21,7 +21,7 @@
             </a-button>
           </div>
         </a-tab-pane>
-        <a-tab-pane key="2" tab="手术方式" force-render>
+        <a-tab-pane key="2" tab="手术名称" force-render>
           <div class="list-item">
             <a-list bordered :data-source="allSsfsData">
               <a-list-item slot="renderItem" slot-scope="item">
@@ -94,7 +94,7 @@
     data() {
       return {
         allZdData: [],//诊断部位数据
-        allSsfsData: [],//所有手术方式数据
+        allSsfsData: [],//所有手术名称数据
         allZlfsData: [],//所有治疗方式数据
         allZljgData: [],//所有治疗结果数据
         allTitleType: [],//所有职称数据
@@ -104,7 +104,7 @@
     },
     mounted() {
       this.getDiagnosisData();//获取所有诊断数据
-      this.getOperationData();// 获取所有手术方式数据
+      this.getOperationData();// 获取所有手术名称数据
       this.getTreatmentMethodData();// 获取所有治疗方式数据
       this.getTreatmentOutcomeData();// 获取所有治疗结果数据
       this.getCaseTitleType();//获取所有职称信息
@@ -126,7 +126,7 @@
           self.$message.error('请求失败');
         });
       },
-      //获取所有手术方式数据
+      //获取所有手术名称数据
       getOperationData() {
         const self = this;
         self.$http.get('/swing/dictionary/OPERATION_NAME_TYPE').then((res) => {
