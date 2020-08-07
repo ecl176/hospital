@@ -503,7 +503,7 @@
               <img :src="item.src" alt="">
             </div> -->
             <a-tabs v-model="preBath" v-show="preImageTabs.length > 0">
-              <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items">
+              <a-tab-pane v-for="(items) in preImageTabs" :key="items" :tab="items" class="img-list-box">
                 <div class="upload-img-btn">
                   <a-upload
                     listType="picture-card"
@@ -511,6 +511,7 @@
                     :showUploadList="false"
                     accept="image/*"
                     :customRequest="beforeImgUpload"
+                    :multiple="true"
                   >
                     <div>
                       <a-icon type="plus" />
@@ -551,7 +552,7 @@
             </div> -->
             <a-button type="primary" class="add-floder" @click="handleAddFloder('INTRA_OPERATIVE_IMAGE_TYPE')">新增批次</a-button>
             <a-tabs v-model="intraBath" v-show="intraImageTabs.length > 0">
-              <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items">
+              <a-tab-pane v-for="(items) in intraImageTabs" :key="items" :tab="items" class="img-list-box">
                 <div class="upload-img-btn">
                   <a-upload
                     listType="picture-card"
@@ -559,6 +560,7 @@
                     :showUploadList="false"
                     accept="image/*"
                     :customRequest="intraImgUpload"
+                    :multiple="true"
                   >
                     <div>
                       <a-icon type="plus" />
@@ -600,7 +602,7 @@
             </div>
             -->
             <a-tabs v-model="afterBath" v-show="afterImageTabs.length > 0">
-              <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items">
+              <a-tab-pane v-for="(items) in afterImageTabs" :key="items" :tab="items" class="img-list-box">
                 <div class="upload-img-btn">
                   <a-upload
                     listType="picture-card"
@@ -608,6 +610,7 @@
                     :showUploadList="false"
                     accept="image/*"
                     :customRequest="afterImgUpload"
+                    :multiple="true"
                   >
                     <div>
                       <a-icon type="plus" />
@@ -1838,11 +1841,15 @@ import { downloadFileFromResource } from '@/utils/file'
           top: 80px;
           left: 0;
         }
+        .img-list-box {
+          padding-left: 140px;
+        }
         .upload-img-btn {
           float: left;
           width: 102px;
           height: 104px;
-          margin-top: 45px;
+          margin-top: 30px;
+          margin-left: -120px;
         }
         .items-list {
           float: left;
