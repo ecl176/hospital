@@ -135,13 +135,13 @@ import { downloadFileFromResource } from '@/utils/file'
         // this.allImageData.append('imageFiles', file.file);
       },
       customRequestphoto(file) {
+        self.photoIsLoading = true;
         const self = this;
         self.allFileNum += 1;
         self.allImageData.append('imageFiles', file.file);
         if(self.allFileNum == self.formDatasNum && self.allFileNum !== 0) {
           self.allFileNum = 0;
           self.formDatasNum = 0;
-          self.photoIsLoading = true;
           const params = self.allImageData;
           self.$http.post('/swing/database/import/image', params, {
             headers: {
