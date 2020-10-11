@@ -169,6 +169,7 @@
           show-size-changer
           v-model="pager.pageNo"
           :page-size.sync="pager.pageSize"
+          :pageSizeOptions = pageSizeOption
           :total="pager.total"
           @change="onPageChange"
           @showSizeChange = "onShowSizeChange"
@@ -756,6 +757,7 @@ import { downloadFileFromResource } from '@/utils/file'
   export default {
     data() {
       return {
+        pageSizeOption: ['10', '20', '50', '100'],
         isExporting: false,
         printObj: {
           id: 'printMe',
@@ -939,6 +941,7 @@ import { downloadFileFromResource } from '@/utils/file'
         const self = this;
         self.allCaseData.forEach((item) => {
           if(item.doctorName === index) {
+            self.searchObj.currentCaseId = [];
             self.searchObj.currentCaseId.push(item.doctorId);
           }
         })

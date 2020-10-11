@@ -60,6 +60,7 @@
           show-size-changer
           v-model="pager.pageNo"
           :page-size.sync="pager.pageSize"
+          :pageSizeOptions = pageSizeOption
           :total="pager.total"
           @change="onPageChange"
           @showSizeChange = "onShowSizeChange"
@@ -169,6 +170,7 @@
   export default {
     data() {
       return {
+        pageSizeOption: ['10', '20', '50', '100'],
         allCaseData: [],//所有医生信息
         currentCaseName: [], // 默认医生信息
         caseName: '',//患者姓名
