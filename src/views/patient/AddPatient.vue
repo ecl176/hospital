@@ -316,8 +316,7 @@ export default {
     },
     beforeDestroy() {
         if (self.personId !== '') {
-            debugger;
-            // this.deleteCaseInfo();
+            this.deleteCaseInfo();
         }
     },
     methods: {
@@ -401,7 +400,6 @@ export default {
         async beforeUpload(file) {
             const self = this;
             if (self.floderName === '') {
-                debugger;
                 self.preImageData = [];
                 self.intraImageData = [];
                 self.afterImageData = [];
@@ -491,6 +489,7 @@ export default {
                 formData.append('image', file.file);
                 formData.append('type', type);
                 formData.append('caseNo', self.patientId);
+                formData.append('caseId', self.personId);
                 formData.append('bath', bath);
 
                 self.$http.post('/swing/image', formData, )
@@ -526,6 +525,7 @@ export default {
                 .then(function (res) {
                     if (res.status == 200) {
                         // self.floderName = '';
+                        debugger;
                         self.personId = res.data.caseId;
                         self.hospitalNum = res.data.caseNo;
                         // const data = res.data;
@@ -695,6 +695,7 @@ export default {
             formData.append('image', file.file);
             formData.append('type', 'PRE_OPERATIVE_IMAGE_TYPE');
             formData.append('caseNo', self.patientId);
+            formData.append('caseId', self.personId);
             formData.append('bath', self.preBath);
             self.$http.post('/swing/image', formData)
                 .then((res) => {
@@ -719,6 +720,7 @@ export default {
             formData.append('image', file.file);
             formData.append('type', 'INTRA_OPERATIVE_IMAGE_TYPE');
             formData.append('caseNo', self.patientId);
+            formData.append('caseId', self.personId);
             formData.append('bath', self.intraBath);
             self.$http.post('/swing/image', formData)
                 .then((res) => {
@@ -743,6 +745,7 @@ export default {
             formData.append('image', file.file);
             formData.append('type', 'POST_OPERATIVE_IMAGE_TYPE');
             formData.append('caseNo', self.patientId);
+            formData.append('caseId', self.personId);
             formData.append('bath', self.afterBath);
             self.$http.post('/swing/image', formData)
                 .then((res) => {
@@ -890,7 +893,9 @@ export default {
                 formData.append('image', file.file);
                 formData.append('type', self.activeType);
                 formData.append('caseNo', self.patientId);
+                formData.append('caseId', self.personId);
                 formData.append('bath', self.dialogObj.name);
+                formData.append('isCreate', true);
                 self.$http.post('/swing/image', formData)
                     .then((res) => {
                         const data = res.data;
@@ -906,6 +911,7 @@ export default {
                     }).catch((err) => {
                         console.log(err);
                         self.dialogLoading = false;
+                        self.$message.error('批次重复，请重新输入批次');
                     });
             }
         },

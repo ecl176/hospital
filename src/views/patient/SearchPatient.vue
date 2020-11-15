@@ -955,6 +955,7 @@ export default {
                 self.editModalVisible = true;
                 // self.tableCurrentIndex = key;
                 const data = rowData;
+                self.currentCaseIds = rowData.id;
                 self.editObj.hospitalNum = data.caseNo;
                 self.editObj.id = data.id;
                 self.editObj.currentCaseName = [];
@@ -1119,6 +1120,7 @@ export default {
             formData.append('image', file.file);
             formData.append('type', 'PRE_OPERATIVE_IMAGE_TYPE');
             formData.append('caseNo', self.editObj.hospitalNum);
+            formData.append('caseId', self.editObj.id);
             formData.append('bath', self.preBath);
             self.$http.post('/swing/image', formData)
                 .then((res) => {
@@ -1143,6 +1145,7 @@ export default {
             formData.append('image', file.file);
             formData.append('type', 'INTRA_OPERATIVE_IMAGE_TYPE');
             formData.append('caseNo', self.editObj.hospitalNum);
+            formData.append('caseId', self.editObj.id);
             formData.append('bath', self.intraBath);
             self.$http.post('/swing/image', formData)
                 .then((res) => {
@@ -1167,6 +1170,7 @@ export default {
             formData.append('image', file.file);
             formData.append('type', 'POST_OPERATIVE_IMAGE_TYPE');
             formData.append('caseNo', self.editObj.hospitalNum);
+            formData.append('caseId', self.editObj.id);
             formData.append('bath', self.afterBath);
             self.$http.post('/swing/image', formData)
                 .then((res) => {
@@ -1474,6 +1478,7 @@ export default {
                 formData.append('image', file.file);
                 formData.append('type', self.activeType);
                 formData.append('caseNo', self.patientId);
+                formData.append('caseId', self.currentCaseIds);
                 formData.append('bath', self.dialogObj.name);
                 formData.append('isCreate', true);
                 self.$http.post('/swing/image', formData)
@@ -1488,9 +1493,9 @@ export default {
                         };
                         self.dialogObj.imgdata.push(obj);
                         self.dialogLoading = false;
-                    }).catch((err) => {
-                        console.log(err);
+                    }).catch(() => {
                         self.dialogLoading = false;
+                        self.$message.error('批次重复，请重新输入批次');
                     });
             }
         },
