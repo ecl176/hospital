@@ -315,7 +315,7 @@ export default {
         this.getTreatmentOutcomeData();
     },
     beforeDestroy() {
-        if (self.personId !== '') {
+        if (this.personId !== '') {
             this.deleteCaseInfo();
         }
     },
@@ -418,7 +418,6 @@ export default {
                     self.$http.post('/swing/patientcase/multipleDelete', params)
                         .then(() => {
                             // self.tableData.splice(self.currentIndex, 1);
-                            debugger;
                             self.$http.delete('/swing/image/' + self.hospitalNum + '/' + self.personId)
                                 .then(() => {
                                     self.personId = '';
@@ -525,7 +524,6 @@ export default {
                 .then(function (res) {
                     if (res.status == 200) {
                         // self.floderName = '';
-                        debugger;
                         self.personId = res.data.caseId;
                         self.hospitalNum = res.data.caseNo;
                         // const data = res.data;

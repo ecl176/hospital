@@ -715,12 +715,15 @@ export default {
         };
     },
     mounted() {
-        this.getCaseData(); // 获取所有医生信息
-        this.getDiagnosisData(); //获取所有诊断数据
-        this.getOperationData(); // 获取所有手术名称数据
-        this.getTreatmentMethodData(); // 获取所有治疗方式数据
-        this.getTreatmentOutcomeData();
-        this.handleSearch();
+        var self = this;
+        self.getCaseData(); // 获取所有医生信息
+        self.getDiagnosisData(); //获取所有诊断数据
+        self.getOperationData(); // 获取所有手术名称数据
+        self.getTreatmentMethodData(); // 获取所有治疗方式数据
+        self.getTreatmentOutcomeData();
+        setTimeout(function () {
+            self.handleSearch();
+        }, 100);
     },
     methods: {
         // 获取所有医生信息
