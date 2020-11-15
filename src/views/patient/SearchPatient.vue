@@ -114,7 +114,7 @@
         <a-button type="primary" @click="resetForm" style="margin-left: 15px;">重置</a-button>
     </div>
     <div class="table-btns">
-        <a-button type="primary" @click="handleMultDelete" :disabled="allCurrentCaseId.length === 0 || !!isExporting">删除</a-button>
+        <a-button type="primary" @click="handleMultDelete" :disabled="allCurrentCaseIds.length === 0 || !!isExporting">删除</a-button>
         <a-button type="primary" @click="handleExport" :loading="!!isExporting">导出</a-button>
         <a-button type="primary" v-print="printObj" @click="handlePrint">打印</a-button>
     </div>
@@ -1336,8 +1336,10 @@ export default {
                         self.$message.error('导出失败');
                     });
                 } else {
-                    const params = self.allCurrentCaseId;
-                    self.$http.post('/swing/patientcaserecord/caseNos', params, {
+                    const params = {
+                        caseIds: self.allCurrentCaseIds
+                    };
+                    self.$http.post('/swing/patientcaserecord/caseIds', params, {
                         responseType: 'blob'
                     }).then((res) => {
                         self.isExporting = false;
@@ -1363,6 +1365,8 @@ export default {
             self.$http.post('/swing/patientcase/multipleDelete', params)
                 .then(() => {
                     self.$message.success('删除成功');
+                    self.allCurrentCaseId = [];
+                    self.allCurrentCaseIds = [];
                     self.handleSearch();
                 }).catch((err) => {
                     console.log(err);
